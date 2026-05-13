@@ -3,6 +3,31 @@
 Script di infrastruttura del gruppo. Cross-OS (Windows, macOS, Linux), in Python
 puro per portabilita'.
 
+## Quickstart (prima volta)
+
+```bash
+git clone https://github.com/Mark2Mac/FAIML_group_64_clean.git
+cd FAIML_group_64_clean
+
+# 1. Install: rclone (vedi sotto) + gh (gh CLI)
+# 2. Configura rclone: rclone config (vedi sotto)
+# 3. Verifica setup:
+python tools/check-setup.py
+# Se tutto verde, lancia:
+python tools/start-work.py
+```
+
+## check-setup.py
+
+Verifica che il tuo ambiente sia completo: git, python, rclone, gh, remote gdrive:,
+shortcut Drive, accesso GitHub, layout repo. Per ogni problema dice come fixare.
+
+```bash
+python tools/check-setup.py
+```
+
+Exit code 0 se tutto ok, > 0 se manca qualcosa.
+
 ## start-work.py
 
 Sincronizzazione one-shot da lanciare PRIMA di ogni sessione di lavoro.
