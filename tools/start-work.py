@@ -79,7 +79,12 @@ RCLONE_EXCLUDES = [
     "*.mp4",
     "*.gif",
     "drive-mirror/**",
-    "part2/panda-gym/**",  # troppo grosso, Colab lo installa via pip
+    # NB: NON escludiamo part2/panda-gym/ — la versione PyPI non ha i kwarg
+    # `type="source"/"target"` che servono per Task 5/6. Va il custom del prof.
+    "part2/panda-gym/.github/**",
+    "part2/panda-gym/docs/**",
+    "part2/panda-gym/test/**",
+    "part2/panda-gym/examples/**",
 ]
 
 
