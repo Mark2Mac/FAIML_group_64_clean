@@ -17,3 +17,6 @@ __pycache__/
 .vscode/
 .idea/
 .DS_Store
+
+# Local mirror dei risultati training scaricati dal Drive
+drive-mirror/
