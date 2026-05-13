@@ -1,0 +1,19 @@
+# Ambienti virtuali
+venv/
+.venv/
+env/
+
+# Modelli salvati
+*.pth
+models/
+part1/models/
+
+# Cache di Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE e sistema
+.vscode/
+.idea/
+.DS_Store
