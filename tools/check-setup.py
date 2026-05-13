@@ -91,27 +91,37 @@ def check_rclone_remote():
         return
     ok(f"rclone remotes: {out.strip().split(chr(10))}")
 
-    # Test funzionante (lista root MyDrive)
+    # Test mirato sulla cartella del progetto (no lista root MyDrive che puo'
+    # essere lentissima se hai molte cartelle).
     try:
-        out = subprocess.check_output(["rclone", "lsd", "gdrive:"], text=True,
-                                       stderr=subprocess.STDOUT, timeout=15)
+        out = subprocess.check_output(
+            ["rclone", "lsd", "gdrive:FAIML_group_64"],
+            text=True, stderr=subprocess.STDOUT, timeout=30,
+        )
+    except subprocess.TimeoutExpired:
+        fail("rclone lsd gdrive:FAIML_group_64 timeout (> 30s). Internet lento o auth scaduta.")
+        print("      Fix: rclone config reconnect gdrive: (o rilancia tra qualche minuto)")
+        issues.append("rclone gdrive: timeout")
+        return
     except subprocess.CalledProcessError as e:
-        fail(f"rclone lsd gdrive: ha fallito\n      {e.output.strip() if e.output else e}")
+        fail(f"rclone lsd gdrive:FAIML_group_64 ha fallito\n      {e.output.strip() if e.output else e}")
         print("      Possibili cause:")
         print("        - Token OAuth scaduto: rclone config reconnect gdrive:")
-        print("        - service_account_file errato: edita ~/.config/rclone/rclone.conf")
-        issues.append("rclone gdrive: non raggiungibile")
+        print("        - Shortcut MyDrive mancante: apri https://drive.google.com/drive/folders/1oWQ04jeGPfCCc9MA8PWKABnhlUtTwhmE")
+        print("                                     tasto destro -> Add shortcut to Drive -> MyDrive")
+        issues.append("rclone gdrive:FAIML_group_64 non raggiungibile")
         return
-    ok("rclone gdrive: raggiungibile")
+    ok("rclone gdrive:FAIML_group_64 raggiungibile")
 
-    # Verifica cartella FAIML_group_64 esiste
-    if "FAIML_group_64" not in out:
-        warn("Cartella 'FAIML_group_64' non trovata in MyDrive root.")
-        print("      Setup: apri https://drive.google.com/drive/folders/1oWQ04jeGPfCCc9MA8PWKABnhlUtTwhmE")
-        print("             tasto destro -> Add shortcut to Drive -> MyDrive")
-        issues.append("shortcut Drive mancante")
+    # Verifica sottocartelle attese
+    expected_dirs = {"code", "checkpoints", "locks", "models", "tensorboard", "plots"}
+    found = {line.split()[-1] for line in out.strip().splitlines() if line.strip()}
+    missing = expected_dirs - found
+    if missing:
+        warn(f"Sottocartelle attese mancanti nel Drive: {sorted(missing)}")
+        print("      (potrebbero non essere ancora create — chiedi al coordinatore)")
     else:
-        ok("Drive shortcut 'FAIML_group_64' trovato")
+        ok(f"Drive folder layout OK (trovate: {sorted(expected_dirs & found)})")
 
 
 def check_github_access():
