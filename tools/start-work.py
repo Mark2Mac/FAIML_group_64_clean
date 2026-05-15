@@ -83,7 +83,7 @@ RCLONE_EXCLUDES = [
     "part2/panda-gym/.github/**",
     "part2/panda-gym/docs/**",
     "part2/panda-gym/test/**",
-    "part2/panda-gym/examples/**",
+    # Niente exclude examples/: i sample prof (PickAndPlace.ipynb, train_push.py) servono su Colab
 ]
 
 
