@@ -61,13 +61,6 @@ class Policy(torch.nn.Module):
         sigma = self.sigma_activation(self.sigma)
         normal_dist = Normal(action_mean, sigma)
 
-
-        """
-            Critic
-        """
-        # TASK 3: forward in the critic network
-
-        
         return normal_dist
 
 
@@ -85,7 +78,7 @@ class Agent(object):
         self.done = []
 
 
-    def update_policy(self):
+    def update_policy(self, baseline=0.0):
         action_log_probs = torch.stack(self.action_log_probs, dim=0).to(self.train_device).squeeze(-1)
         states = torch.stack(self.states, dim=0).to(self.train_device).squeeze(-1)
         next_states = torch.stack(self.next_states, dim=0).to(self.train_device).squeeze(-1)
@@ -93,7 +86,6 @@ class Agent(object):
         done = torch.Tensor(self.done).to(self.train_device)
 
         self.states, self.next_states, self.action_log_probs, self.rewards, self.done = [], [], [], [], []
-
         #
         # TASK 2:
         #   - compute discounted returns
@@ -101,16 +93,14 @@ class Agent(object):
         #   - compute gradients and step the optimizer
         #
 
+        discounted_returns = discount_rewards(rewards, self.gamma)
+        loss = -torch.sum((discounted_returns - baseline) * action_log_probs)
 
-        #
-        # TASK 3:
-        #   - compute boostrapped discounted return estimates
-        #   - compute advantage terms
-        #   - compute actor loss and critic loss
-        #   - compute gradients and step the optimizer
-        #
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
 
-        return        
+        return
 
 
     def get_action(self, state, evaluation=False):
