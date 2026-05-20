@@ -9,6 +9,7 @@ NUM_RUNS = 3
 
 
 def eval_model(env, model_path, n_episodes):
+    """Carica un modello e valutalo per n_episodes episodi. Ritorna array di returns."""
     obs_dim = env.observation_space.shape[0]
     act_dim = env.action_space.shape[0]
 
@@ -72,6 +73,42 @@ def main():
             print(f"    Min     : {np.min(all_returns):.2f}")
             print(f"    Max     : {np.max(all_returns):.2f}")
             np.save(f"part1/models/test_returns_baseline_{baseline}_all.npy", all_returns)
+
+    # --- Actor-Critic models ---
+    print(f"\n{'='*50}")
+    print(f" ACTOR-CRITIC")
+    print(f"{'='*50}")
+
+    all_returns = []
+
+    for run in range(1, NUM_RUNS + 1):
+        model_path = f"part1/models/policy_actor_critic_run_{run}.pth"
+        print(f"\n  Run {run}/{NUM_RUNS} — {model_path}")
+
+        try:
+            returns = eval_model(env, model_path, N_TEST_EPISODES)
+        except FileNotFoundError:
+            print(f"    [SKIP] File non trovato — esegui prima train_ac.py")
+            continue
+
+        np.save(f"part1/models/test_returns_actor_critic_run_{run}.npy", returns)
+
+        print(f"    Episodi : {N_TEST_EPISODES}")
+        print(f"    Mean    : {np.mean(returns):.2f}")
+        print(f"    Std     : {np.std(returns):.2f}")
+        print(f"    Min     : {np.min(returns):.2f}")
+        print(f"    Max     : {np.max(returns):.2f}")
+
+        all_returns.append(returns)
+
+    if all_returns:
+        all_returns = np.concatenate(all_returns)
+        print(f"\n  --- Aggregato ({len(all_returns)} episodi totali) ---")
+        print(f"    Mean    : {np.mean(all_returns):.2f}")
+        print(f"    Std     : {np.std(all_returns):.2f}")
+        print(f"    Min     : {np.min(all_returns):.2f}")
+        print(f"    Max     : {np.max(all_returns):.2f}")
+        np.save(f"part1/models/test_returns_actor_critic_all.npy", all_returns)
 
     env.close()
 

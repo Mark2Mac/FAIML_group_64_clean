@@ -38,6 +38,9 @@ class Policy(torch.nn.Module):
             Critic network
         """
         # TASK 3: critic network for actor-critic algorithm
+        self.fc1_critic = torch.nn.Linear(state_space, self.hidden)
+        self.fc2_critic = torch.nn.Linear(self.hidden, self.hidden)
+        self.fc3_critic = torch.nn.Linear(self.hidden, 1)
 
 
         self.init_weights()
@@ -61,7 +64,16 @@ class Policy(torch.nn.Module):
         sigma = self.sigma_activation(self.sigma)
         normal_dist = Normal(action_mean, sigma)
 
-        return normal_dist
+
+        """
+            Critic
+        """
+        # TASK 3: forward in the critic network
+        x_critic = self.tanh(self.fc1_critic(x))
+        x_critic = self.tanh(self.fc2_critic(x_critic))
+        value = self.fc3_critic(x_critic)
+
+        return normal_dist, value
 
 
 class Agent(object):
@@ -78,7 +90,7 @@ class Agent(object):
         self.done = []
 
 
-    def update_policy(self, baseline=0.0):
+    def update_policy(self, baseline=0.0, actor_critic=False):
         action_log_probs = torch.stack(self.action_log_probs, dim=0).to(self.train_device).squeeze(-1)
         states = torch.stack(self.states, dim=0).to(self.train_device).squeeze(-1)
         next_states = torch.stack(self.next_states, dim=0).to(self.train_device).squeeze(-1)
@@ -86,15 +98,46 @@ class Agent(object):
         done = torch.Tensor(self.done).to(self.train_device)
 
         self.states, self.next_states, self.action_log_probs, self.rewards, self.done = [], [], [], [], []
-        #
-        # TASK 2:
-        #   - compute discounted returns
-        #   - compute policy gradient loss function given actions and returns
-        #   - compute gradients and step the optimizer
-        #
 
-        discounted_returns = discount_rewards(rewards, self.gamma)
-        loss = -torch.sum((discounted_returns - baseline) * action_log_probs)
+        if actor_critic:
+            #
+            # TASK 3:
+            #   - compute bootstrapped discounted return estimates
+            #   - compute advantage terms
+            #   - compute actor loss and critic loss
+            #   - compute gradients and step the optimizer
+            #
+
+            # Get state values from the critic
+            _, values = self.policy(states)
+            _, next_values = self.policy(next_states)
+            values = values.squeeze(-1)
+            next_values = next_values.squeeze(-1)
+
+            # Bootstrapped return estimates (TD targets): G_t = r_t + γ·V(s_{t+1})·(1 - done_t)
+            targets = rewards + self.gamma * next_values.detach() * (1 - done)
+
+            # Advantage: A_t = G_t - V(s_t)  (TD error)
+            advantages = targets - values
+
+            # Actor loss: policy gradient weighted by advantage (detach to stop gradient to critic)
+            actor_loss = -torch.mean(advantages.detach() * action_log_probs)
+
+            # Critic loss: MSE between predicted values and TD targets
+            critic_loss = F.mse_loss(values, targets.detach())
+
+            loss = actor_loss + critic_loss
+
+        else:
+            #
+            # TASK 2:
+            #   - compute discounted returns
+            #   - compute policy gradient loss function given actions and returns
+            #   - compute gradients and step the optimizer
+            #
+
+            discounted_returns = discount_rewards(rewards, self.gamma)
+            loss = -torch.sum((discounted_returns - baseline) * action_log_probs)
 
         self.optimizer.zero_grad()
         loss.backward()
@@ -107,7 +150,7 @@ class Agent(object):
         """ state -> action (3-d), action_log_densities """
         x = torch.from_numpy(state).float().to(self.train_device)
 
-        normal_dist = self.policy(x)
+        normal_dist, _ = self.policy(x)
 
         if evaluation:  # Return mean
             return normal_dist.mean, None
