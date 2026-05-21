@@ -17,6 +17,35 @@ __pycache__/
 .vscode/
 .idea/
 .DS_Store
+Thumbs.db
 
-# Local mirror dei risultati training scaricati dal Drive
-drive-mirror/
+# SB3 / RL training output
+runs/
+wandb/
+tensorboard/
+tb_logs/
+*.zip
+outputs/
+results/
+videos/
+*.mp4
+*.gif
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Secrets / env
+.env
+*.env
+secrets/
+
+# LaTeX / PDF generation auxiliary files (ignore junk, keep source)
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.blg
+*.bbl
