@@ -1,0 +1,14 @@
+\section{Introduction}
+Reinforcement Learning has recently shown remarkable success in solving continuous control tasks, enabling agents to acquire manipulation and locomotion skills.
+
+However, training these policies on real physical hardware is often unfeasible due to costs, mechanical wear and safety constraints.
+As a result of this, the standard procedure relies on training these agents in simulated environments before deploying them into the real world.
+
+A major challenge in this procedure is the \textit{reality gap}, the discrepancy between the simulated training environment and the actual world. This is often caused by unmodeled dynamics or sensor noise leading to a degradation of performance when moving from the simulation to the real world. 
+
+The first part of this work focuses on the \texttt{Hopper-v4} locomotion task, an environment where a one-legged robot must learn to jump forward without falling. Within this setting, we implement the vanilla REINFORCE algorithm from scratch and evaluate the critical role of baseline subtraction by testing both a zero baseline and a constant baseline. 
+
+Finally, we design and implement a one-step Actor-Critic architecture to show how bootstrapping and temporal difference learning can reduce gradient variance. This improves learning stability and speeds up policy convergence.
+
+
+[[AGGIUNGERE QUI PARTE DUE SU PPO E SAC]]
