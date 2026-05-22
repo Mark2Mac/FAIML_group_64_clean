@@ -26,7 +26,16 @@ class RandomizationWrapper(gym.Wrapper):
     def _sample_mass(self):
 
         if self.mode == "none":
+            self.mass_min = self.mass_min_limit
+            self.mass_max = self.mass_max_limit
+            self.last_sample_type = "none"
             return None
+        elif self.mode == "udr":
+            import random
+            self.mass_min = self.mass_min_limit
+            self.mass_max = self.mass_max_limit
+            self.last_sample_type = "interior"
+            return random.uniform(self.mass_min, self.mass_max)
         else:
             raise NotImplementedError(f"Sampling strategy '{self.mode}' is not implemented yet.")
 
@@ -46,7 +55,7 @@ class RandomizationWrapper(gym.Wrapper):
 
     def reset(self, **kwargs):
 
-        new_mass = ... #TODO: sample new mass
+        new_mass = self._sample_mass()
 
         if new_mass is not None:
 
