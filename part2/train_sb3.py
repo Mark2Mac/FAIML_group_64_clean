@@ -4,7 +4,7 @@ from collections import deque
 import gymnasium as gym
 import numpy as np
 import panda_gym  # type: ignore[import-not-found]
-from stable_baselines3 import DDPG
+from stable_baselines3 import SAC
 from rand_wrapper import RandomizationWrapper
 
 
@@ -43,10 +43,13 @@ def main() -> None:
         reward_type="dense",
     )
 
-    #TODO: add randomization wrapper here
-    #TODO: create model and train it
+    env = RandomizationWrapper(env, mode=args.sampling_strategy)
+
+    model = SAC("MultiInputPolicy", env, verbose=1)
+    model.learn(total_timesteps=args.timesteps)
+
     save_name = f"sac_push_{args.sampling_strategy}_{args.env_type}_{args.timesteps // 1000}k"
-    # TODO: model.save(save_name)
+    model.save(save_name)
 
 
 if __name__ == "__main__":
