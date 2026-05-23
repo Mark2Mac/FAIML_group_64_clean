@@ -102,7 +102,7 @@ def main() -> None:
         verbose=1,
     )
 
-    model.learn(total_timesteps=args.timesteps, callback=ckpt_cb)
+    model.learn(total_timesteps=args.timesteps, callback=ckpt_cb, progress_bar=True)
 
     os.makedirs(args.model_dir, exist_ok=True)
     save_name = os.path.join(args.model_dir, run_name)
