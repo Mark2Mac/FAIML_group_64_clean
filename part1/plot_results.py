@@ -31,7 +31,7 @@ plt.rcParams.update({
     "font.size": 11,
     "axes.grid": True,
     "grid.alpha": 0.3,
-    "figure.dpi": 150,
+    "figure.dpi": 300,
     "savefig.bbox": "tight",
     "savefig.pad_inches": 0.1,
 })
@@ -70,7 +70,7 @@ def runs_to_matrix(runs):
 
 # ── 1. Learning Curves (reward) ────────────────────────────────────────────
 def plot_learning_curves():
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(8, 4))
 
     for name, cfg in ALGORITHMS.items():
         runs = load_runs(cfg["prefix"], "rewards")
@@ -88,18 +88,18 @@ def plot_learning_curves():
 
     ax.set_xlabel("Episode")
     ax.set_ylabel(f"Return (rolling avg, w={SMOOTH_WINDOW})")
-    ax.set_title("Learning Curves — REINFORCE vs Actor-Critic on Hopper-v4")
-    ax.legend(loc="upper left")
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(500))
+    ax.set_title("Learning Curves — REINFORCE vs Actor-Critic")
+    ax.legend(loc="lower right")
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(1000))
     fig.savefig(os.path.join(FIGURES_DIR, "learning_curves.pdf"))
     fig.savefig(os.path.join(FIGURES_DIR, "learning_curves.png"))
-    print("  ✓ learning_curves.pdf")
+    print("  [OK] learning_curves.pdf")
     plt.close(fig)
 
 
 # ── 2. Episode Length Curves ────────────────────────────────────────────────
 def plot_episode_lengths():
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(8, 4))
 
     for name, cfg in ALGORITHMS.items():
         runs = load_runs(cfg["prefix"], "lengths")
@@ -116,12 +116,12 @@ def plot_episode_lengths():
 
     ax.set_xlabel("Episode")
     ax.set_ylabel(f"Episode Length (rolling avg, w={SMOOTH_WINDOW})")
-    ax.set_title("Episode Lengths — REINFORCE vs Actor-Critic on Hopper-v4")
-    ax.legend(loc="upper left")
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(500))
+    ax.set_title("Episode Lengths — REINFORCE vs Actor-Critic")
+    ax.legend(loc="lower right")
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(1000))
     fig.savefig(os.path.join(FIGURES_DIR, "episode_lengths.pdf"))
     fig.savefig(os.path.join(FIGURES_DIR, "episode_lengths.png"))
-    print("  ✓ episode_lengths.pdf")
+    print("  [OK] episode_lengths.pdf")
     plt.close(fig)
 
 
@@ -153,27 +153,82 @@ def plot_test_returns():
     ax.set_title("Test Performance — REINFORCE vs Actor-Critic on Hopper-v4")
     fig.savefig(os.path.join(FIGURES_DIR, "test_returns_boxplot.pdf"))
     fig.savefig(os.path.join(FIGURES_DIR, "test_returns_boxplot.png"))
-    print("  ✓ test_returns_boxplot.pdf")
+    print("  [OK] test_returns_boxplot.pdf")
     plt.close(fig)
 
 
-# ── 4. Test Returns — Bar Chart (mean ± std) ────────────────────────────────
-def plot_test_bar():
-    fig, ax = plt.subplots(figsize=(8, 5))
+# ── 5. Losses ───────────────────────────────────────────────────────────────
+def plot_losses():
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+    
+    # REINFORCE Losses
+    for name, cfg in ALGORITHMS.items():
+        if "REINFORCE" not in name:
+            continue
+        runs = load_runs(cfg["prefix"], "losses")
+        if not runs:
+            continue
+        mat = runs_to_matrix(runs)
+        smoothed = np.array([smooth(mat[i], SMOOTH_WINDOW) for i in range(len(runs))])
+        mean = np.nanmean(smoothed, axis=0)
+        std  = np.nanstd(smoothed, axis=0)
+        episodes = np.arange(1, len(mean) + 1)
+        ax1.plot(episodes, mean, label=name, color=cfg["color"], lw=2)
+        ax1.fill_between(episodes, mean - std, mean + std, alpha=0.15, color=cfg["color"])
+        
+    ax1.set_xlabel("Episode")
+    ax1.set_ylabel("Loss (rolling avg)")
+    ax1.set_title("REINFORCE Loss")
+    ax1.legend()
+    
+    # Actor-Critic Losses
+    ac_name = "Actor-Critic"
+    ac_cfg = ALGORITHMS[ac_name]
+    actor_runs = load_runs(ac_cfg["prefix"], "actor_losses")
+    critic_runs = load_runs(ac_cfg["prefix"], "critic_losses")
+    
+    if actor_runs and critic_runs:
+        mat_actor = runs_to_matrix(actor_runs)
+        mat_critic = runs_to_matrix(critic_runs)
+        sm_actor = np.array([smooth(mat_actor[i], SMOOTH_WINDOW) for i in range(len(actor_runs))])
+        sm_critic = np.array([smooth(mat_critic[i], SMOOTH_WINDOW) for i in range(len(critic_runs))])
+        
+        m_a, s_a = np.nanmean(sm_actor, axis=0), np.nanstd(sm_actor, axis=0)
+        m_c, s_c = np.nanmean(sm_critic, axis=0), np.nanstd(sm_critic, axis=0)
+        ep = np.arange(1, len(m_a) + 1)
+        
+        ax2.plot(ep, m_a, label="Actor Loss", color="#9b59b6", lw=2)
+        ax2.fill_between(ep, m_a - s_a, m_a + s_a, alpha=0.15, color="#9b59b6")
+        ax2.plot(ep, m_c, label="Critic Loss", color="#e67e22", lw=2)
+        ax2.fill_between(ep, m_c - s_c, m_c + s_c, alpha=0.15, color="#e67e22")
+        
+    ax2.set_xlabel("Episode")
+    ax2.set_ylabel("Loss (rolling avg)")
+    ax2.set_title("Actor-Critic Losses")
+    ax2.legend()
+    
+    fig.tight_layout()
+    fig.savefig(os.path.join(FIGURES_DIR, "losses.pdf"))
+    fig.savefig(os.path.join(FIGURES_DIR, "losses.png"))
+    print("  [OK] losses.pdf")
+    plt.close(fig)
+
+# ── 6. Training Time Bar Chart ─────────────────────────────────────────────
+def plot_time_bar():
+    fig, ax = plt.subplots(figsize=(6, 4))
     algo_names, means, stds, bar_colors = [], [], [], []
 
     for name, cfg in ALGORITHMS.items():
-        runs = load_runs(cfg["prefix"], "test_returns")
+        runs = load_runs(cfg["prefix"], "time")
         if not runs:
             continue
-        all_returns = np.concatenate(runs)
+        all_times = np.concatenate(runs) / 60.0  # to minutes
         algo_names.append(name)
-        means.append(np.mean(all_returns))
-        stds.append(np.std(all_returns))
+        means.append(np.mean(all_times))
+        stds.append(np.std(all_times))
         bar_colors.append(cfg["color"])
 
     if not algo_names:
-        print("  [SKIP] No test returns found — run test.py first")
         return
 
     x = np.arange(len(algo_names))
@@ -181,23 +236,22 @@ def plot_test_bar():
                   edgecolor="black", linewidth=0.8)
     ax.set_xticks(x)
     ax.set_xticklabels(algo_names)
-    ax.set_ylabel("Mean Test Return +/- Std")
-    ax.set_title("Average Test Performance — Hopper-v4")
+    ax.set_ylabel("Training Time (minutes)")
+    ax.set_title("Training Time Comparison")
 
-    # Annotate bars with values
-    for bar, m, s in zip(bars, means, stds):
-        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + s + 5,
-                f"{m:.1f}", ha='center', va='bottom', fontweight='bold', fontsize=10)
+    for bar, m in zip(bars, means):
+        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() / 2,
+                f"{m:.1f}m", ha='center', va='center', fontweight='bold', color='white', fontsize=10)
 
-    fig.savefig(os.path.join(FIGURES_DIR, "test_returns_bar.pdf"))
-    fig.savefig(os.path.join(FIGURES_DIR, "test_returns_bar.png"))
-    print("  ✓ test_returns_bar.pdf")
+    fig.savefig(os.path.join(FIGURES_DIR, "training_time_bar.pdf"))
+    fig.savefig(os.path.join(FIGURES_DIR, "training_time_bar.png"))
+    print("  [OK] training_time_bar.pdf")
     plt.close(fig)
 
 
-# ── 5. Summary Table (printed to console & saved as txt) ───────────────────
+# ── 7. Summary Table (printed to console & saved as txt) ───────────────────
 def print_summary_table():
-    header = f"{'Algorithm':<22} | {'Train Mean':>10} | {'Train Std':>10} | {'Test Mean':>10} | {'Test Std':>10} | {'Ep. Len Mean':>12}"
+    header = f"{'Algorithm':<22} | {'Train Mean':>10} | {'Train Std':>10} | {'Test Mean':>10} | {'Test Std':>10} | {'Ep. Len Mean':>12} | {'Time (min)':>10}"
     sep = "-" * len(header)
     lines = [sep, header, sep]
 
@@ -205,6 +259,7 @@ def print_summary_table():
         train_runs = load_runs(cfg["prefix"], "rewards")
         test_runs  = load_runs(cfg["prefix"], "test_returns")
         len_runs   = load_runs(cfg["prefix"], "lengths")
+        time_runs  = load_runs(cfg["prefix"], "time")
 
         # Last 500 episodes of training (converged performance)
         if train_runs:
@@ -225,7 +280,12 @@ def print_summary_table():
         else:
             le_mean = float('nan')
 
-        lines.append(f"{name:<22} | {tr_mean:>10.2f} | {tr_std:>10.2f} | {te_mean:>10.2f} | {te_std:>10.2f} | {le_mean:>12.1f}")
+        if time_runs:
+            time_mean = np.mean(np.concatenate(time_runs)) / 60.0 # to minutes
+        else:
+            time_mean = float('nan')
+
+        lines.append(f"{name:<22} | {tr_mean:>10.2f} | {tr_std:>10.2f} | {te_mean:>10.2f} | {te_std:>10.2f} | {le_mean:>12.1f} | {time_mean:>10.1f}")
 
     lines.append(sep)
     table = "\n".join(lines)
@@ -233,7 +293,7 @@ def print_summary_table():
 
     with open(os.path.join(FIGURES_DIR, "summary_table.txt"), "w") as f:
         f.write(table + "\n")
-    print("  ✓ summary_table.txt")
+    print("  [OK] summary_table.txt")
 
 
 # ── Main ────────────────────────────────────────────────────────────────────
@@ -244,7 +304,8 @@ def main():
     plot_learning_curves()
     plot_episode_lengths()
     plot_test_returns()
-    plot_test_bar()
+    plot_losses()
+    plot_time_bar()
     print()
     print_summary_table()
 
