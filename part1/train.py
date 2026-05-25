@@ -31,7 +31,8 @@ def main():
             agent = Agent(policy)
 
             rewards_log = []
-            lengths_log =[]
+            lengths_log = []
+            losses_log = []
             start_time = time.time()
 
             for episode in range(NUM_EPISODES):
@@ -56,9 +57,10 @@ def main():
                     if done:
                         break
 
-                agent.update_policy(baseline)
+                loss = agent.update_policy(baseline)
                 rewards_log.append(episode_reward)
                 lengths_log.append(step_count)
+                losses_log.append(loss)
 
                 if episode % 100 == 0:
                     avg100 = np.mean(rewards_log[-100:])
@@ -74,6 +76,8 @@ def main():
             
             np.save(f"part1/models/rewards_baseline_{baseline}_run_{run}.npy", np.array(rewards_log))
             np.save(f"part1/models/lengths_baseline_{baseline}_run_{run}.npy", np.array(lengths_log))
+            np.save(f"part1/models/losses_baseline_{baseline}_run_{run}.npy", np.array(losses_log))
+            np.save(f"part1/models/time_baseline_{baseline}_run_{run}.npy", np.array([elapsed]))
             
             env.close()
 

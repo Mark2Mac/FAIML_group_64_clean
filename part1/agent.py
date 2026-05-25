@@ -113,17 +113,9 @@ class Agent(object):
             _, next_values = self.policy(next_states)
             values = values.squeeze(-1)
             next_values = next_values.squeeze(-1)
-
-            # Bootstrapped return estimates (TD targets): G_t = r_t + γ·V(s_{t+1})·(1 - done_t)
             targets = rewards + self.gamma * next_values.detach() * (1 - done)
-
-            # Advantage: A_t = G_t - V(s_t)  (TD error)
             advantages = targets - values
-
-            # Actor loss: policy gradient weighted by advantage (detach to stop gradient to critic)
             actor_loss = -torch.mean(advantages.detach() * action_log_probs)
-
-            # Critic loss: MSE between predicted values and TD targets
             critic_loss = F.mse_loss(values, targets.detach())
 
             loss = actor_loss + critic_loss
@@ -143,7 +135,10 @@ class Agent(object):
         loss.backward()
         self.optimizer.step()
 
-        return
+        if actor_critic:
+            return actor_loss.item(), critic_loss.item()
+        else:
+            return loss.item()
 
 
     def get_action(self, state, evaluation=False):
