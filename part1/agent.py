@@ -115,6 +115,8 @@ class Agent(object):
             next_values = next_values.squeeze(-1)
             targets = rewards + self.gamma * next_values.detach() * (1 - done)
             advantages = targets - values
+            advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+            
             actor_loss = -torch.mean(advantages.detach() * action_log_probs)
             critic_loss = F.mse_loss(values, targets.detach())
 
