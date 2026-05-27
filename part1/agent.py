@@ -48,10 +48,15 @@ class Policy(torch.nn.Module):
 
     def init_weights(self):
         for m in self.modules():
-            if type(m) is torch.nn.Linear:
-                torch.nn.init.normal_(m.weight)
+            if isinstance(m, torch.nn.Linear):
+                torch.nn.init.orthogonal_(m.weight, gain=np.sqrt(2))
                 torch.nn.init.zeros_(m.bias)
 
+        # Policy output layer (Actor mean) should use a very small gain (e.g., 0.01)
+        # to ensure initial actions are centered around 0 and variance is controlled
+        if hasattr(self, 'fc3_actor_mean'):
+            torch.nn.init.orthogonal_(self.fc3_actor_mean.weight, gain=0.01)
+            torch.nn.init.zeros_(self.fc3_actor_mean.bias)
 
     def forward(self, x):
         """
@@ -61,7 +66,7 @@ class Policy(torch.nn.Module):
         x_actor = self.tanh(self.fc2_actor(x_actor))
         action_mean = self.fc3_actor_mean(x_actor)
 
-        sigma = self.sigma_activation(self.sigma)
+        sigma = self.sigma_activation(self.sigma) + 1e-3
         normal_dist = Normal(action_mean, sigma)
 
 
@@ -77,10 +82,10 @@ class Policy(torch.nn.Module):
 
 
 class Agent(object):
-    def __init__(self, policy, device='cpu'):
+    def __init__(self, policy, device='cpu', lr=1e-3):
         self.train_device = device
         self.policy = policy.to(self.train_device)
-        self.optimizer = torch.optim.Adam(policy.parameters(), lr=1e-3)
+        self.optimizer = torch.optim.Adam(policy.parameters(), lr=lr)
 
         self.gamma = 0.99
         self.states = []

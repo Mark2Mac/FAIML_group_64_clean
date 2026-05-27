@@ -1,3 +1,4 @@
+import os
 import gymnasium as gym
 import numpy as np
 import torch
@@ -46,7 +47,10 @@ def main():
         all_returns = []
 
         for run in range(1, NUM_RUNS + 1):
-            model_path = f"part1/models/policy_baseline_{baseline}_run_{run}.pth"
+            best_model = f"part1/models/policy_baseline_{baseline}_run_{run}_best.pth"
+            standard_model = f"part1/models/policy_baseline_{baseline}_run_{run}.pth"
+            model_path = best_model if os.path.exists(best_model) else standard_model
+            
             print(f"\n  Run {run}/{NUM_RUNS} — {model_path}")
 
             try:
@@ -82,7 +86,10 @@ def main():
     all_returns = []
 
     for run in range(1, NUM_RUNS + 1):
-        model_path = f"part1/models/policy_actor_critic_run_{run}.pth"
+        best_model = f"part1/models/policy_actor_critic_run_{run}_best.pth"
+        standard_model = f"part1/models/policy_actor_critic_run_{run}.pth"
+        model_path = best_model if os.path.exists(best_model) else standard_model
+        
         print(f"\n  Run {run}/{NUM_RUNS} — {model_path}")
 
         try:

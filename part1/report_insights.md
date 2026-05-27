@@ -83,4 +83,40 @@ This is a classic, mathematically expected **local minimum** in Reinforcement Le
 ### Conclusion of Visual Behavior:
 The agent converges to a highly conservative **"survival policy"** (stalling around a reward of 200–500 over several hundred steps). It has learned that the safest, most cost-effective way to maximize cumulative reward is to prioritize standing still and balancing rather than risking a fall by jumping. 
 To achieve aggressive jumping behavior (scores of 2,000+), one would need advanced exploration mechanisms (like Soft Actor-Critic's entropy maximization), step-size trust regions (like PPO), or a much longer training budget to overcome this strong local minimum.
- 
+
+---
+
+## Dynamic Checkpointing & Stabilization Upgrades (Latest Modifications)
+
+We introduced key codebase modifications to solve training instability and capture peak agent performance:
+
+### 1. Bounded Policy Variance ($\sigma$ Floor)
+* **What we did:** In `agent.py`, we added a mathematical floor of `+ 1e-3` to the policy's standard deviation parameter $\sigma$:
+  $$\sigma = \text{Softplus}(\sigma_{\text{param}}) + 1e-3$$
+* **Quick Insight:** In continuous action spaces, standard deviation parameterization can collapse toward zero during training. When $\sigma \to 0$, the log-probability calculation ($\log(\sigma)$) encounters numerical underflow or divides by zero, causing `NaN` gradients and complete policy collapse. Adding this tiny floor successfully stabilized both REINFORCE and Actor-Critic training.
+
+### 2. Best Model Checkpointing (`_best.pth`)
+* **What we did:** Modified `train.py` and `train_ac.py` to calculate a rolling average of the last 100 episodes (`avg100`). The network weights are automatically saved to `models/policy_..._best.pth` whenever `avg100` exceeds the historical maximum.
+* **Quick Insight:** RL training on continuous tasks (especially without clipping/trust regions) is highly oscillatory. Saving only the "final episode" model risks saving an unstable, collapsed policy. Best Model Checkpointing ensures we capture the agent at its peak stability.
+
+---
+
+## Locomotion Breakthrough: Escaping the "Lazy Hopper" Minimum
+
+In our latest Actor-Critic Run 1 (running with learning rate $0.0007$), we observed a fascinating training trajectory:
+
+### 1. The Trajectory & The "Average Reward Drop" Paradox
+* **The Stand-Still Phase (Episodes 14,200 - 15,500):** The agent quickly locked onto the "Lazy Hopper" policy, standing perfectly upright and achieving a highly stable reward of exactly $\approx 1000$ (maximizing survival bonus with zero control cost).
+* **The Exploration Dip (Episodes 15,700 - 17,200):** As training progressed, the agent began exploring forward-leaning and dynamic jumping actions. Because the Hopper was sbilanciando (leaning) to push forward, it fell over repeatedly after only 200–300 steps. These early falls dropped the individual episode rewards to ~200-300, pulling the rolling average (`Avg100`) down from $1000$ to **~222**.
+* **Report Writer Insight:** This crollo (drop) in average reward is **not a policy collapse**; it is the mathematical consequence of exploration. In order to transition from a safe, stationary posture (local minimum) to active locomotion, the agent must destabilize itself, which temporarily increases the failure rate before stable coordination is learned.
+
+### 2. Physical Breakthrough (Testing `policy_actor_critic_run_1_best.pth`)
+When testing this new best checkpoint (saved when the agent successfully combined forward velocity with long-term survival), we confirmed the agent successfully **escaped the stationary local minimum** and learned an active jumping gait:
+* **Test Episode 1: 1000 steps (Full Survival) | Cumulative Reward: 1129.74**
+* **Test Episode 2: 872 steps | Cumulative Reward: 1031.72**
+* **Test Episode 3: 778 steps | Cumulative Reward: 940.63**
+
+### Quick Insights for the Report:
+* **Proof of Forward Movement:** Because the max survival bonus over 1000 steps is 1000 (1.0 per step), achieving **1129.74** reward and surviving the full 1000 steps is **mathematical proof of positive forward velocity** ($v_x > 0$), as the velocity rewards outweighed the control penalties!
+* **Comparison:** While the previous "best" model stood perfectly still to get 1000, this new best model actually hops forward, covering distance while maintaining balance for most of the episode.
+
