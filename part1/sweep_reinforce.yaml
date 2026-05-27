@@ -1,0 +1,15 @@
+program: part1/train.py
+method: bayes
+metric:
+  name: avg_reward_100
+  goal: maximize
+
+parameters:
+  lr:
+    values: [0.0001, 0.0003, 0.001]
+  episodes:
+    value: 50000
+  runs:
+    value: 1
+  wandb:
+    action: store_true

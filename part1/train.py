@@ -1,5 +1,6 @@
 import os
 import time
+import argparse
 import gymnasium as gym
 import numpy as np
 import torch
@@ -7,41 +8,67 @@ import torch
 from agent import Agent, Policy
 
 def main():
+    parser = argparse.ArgumentParser(description="Train REINFORCE on Hopper-v4")
+    parser.add_argument("--episodes", type=int, default=50000, help="Number of training episodes")
+    parser.add_argument("--runs", type=int, default=3, help="Number of independent runs")
+    parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate for the policy")
+    parser.add_argument("--wandb", action="store_true", help="Enable Weights & Biases logging")
+    parser.add_argument("--project", type=str, default="hopper-faiml", help="W&B project name")
+    args = parser.parse_args()
+
     baselines = [0.0, 20.0]
-    NUM_RUNS = 3          
-    NUM_EPISODES = 5000 
-    
+    NUM_RUNS = args.runs
+    NUM_EPISODES = args.episodes
+
     os.makedirs('part1/models', exist_ok=True)
 
     for baseline in baselines:
         print(f"\n{'='*40}")
-        print(f" INIZIO TRAINING BASELINE: {baseline}")
+        print(f" START TRAINING BASELINE: {baseline}")
+        print(f" Episodes: {NUM_EPISODES} | Runs: {NUM_RUNS} | Learning Rate: {args.lr}")
         print(f"{'='*40}")
-        
+
         for run in range(1, NUM_RUNS + 1):
             print(f"\n--- Run {run}/{NUM_RUNS} ---")
-            
-            
+
+            if args.wandb:
+                import wandb
+                wandb.init(
+                    project=args.project,
+                    group=f"REINFORCE_b_{baseline}",
+                    name=f"REINFORCE_b_{baseline}_run_{run}_lr_{args.lr}",
+                    config={
+                        "algorithm": "REINFORCE",
+                        "baseline": baseline,
+                        "learning_rate": args.lr,
+                        "episodes": NUM_EPISODES,
+                        "run_id": run,
+                        "seed": 42 + run
+                    },
+                    reinit=True
+                )
+
             seed = 42 + run
             torch.manual_seed(seed)
             np.random.seed(seed)
-            
+
             env = gym.make('Hopper-v4')
             policy = Policy(env.observation_space.shape[0], env.action_space.shape[0])
-            agent = Agent(policy)
+            agent = Agent(policy, lr=args.lr)
 
             rewards_log = []
             lengths_log = []
             losses_log = []
+            best_avg_reward = -float('inf')
             start_time = time.time()
 
             for episode in range(NUM_EPISODES):
-                
+
                 if episode == 0:
                     state, _ = env.reset(seed=seed)
                 else:
                     state, _ = env.reset()
-                    
+
                 episode_reward = 0
                 step_count = 0
 
@@ -62,24 +89,43 @@ def main():
                 lengths_log.append(step_count)
                 losses_log.append(loss)
 
+                avg100 = np.mean(rewards_log[-100:])
+
+                if episode >= 100 and avg100 > best_avg_reward:
+                    best_avg_reward = avg100
+                    best_model_path = f"part1/models/policy_baseline_{baseline}_run_{run}_best.pth"
+                    torch.save(agent.policy.state_dict(), best_model_path)
+
+                if args.wandb:
+                    wandb.log({
+                        "episode": episode,
+                        "reward": episode_reward,
+                        "length": step_count,
+                        "loss": loss,
+                        "avg_reward_100": avg100,
+                        "best_avg_reward": best_avg_reward
+                    })
+
                 if episode % 100 == 0:
-                    avg100 = np.mean(rewards_log[-100:])
                     print(f"Baseline {baseline} | Run {run} | Episode {episode:4d} | "
-                          f"Reward: {episode_reward:8.2f} | Avg100: {avg100:8.2f}")
+                          f"Reward: {episode_reward:8.2f} | Avg100: {avg100:8.2f} | Best: {best_avg_reward:8.2f}")
 
             elapsed = time.time() - start_time
             print(f"Training time (baseline={baseline}, run={run}): {elapsed/60:.1f} min")
 
-            # 2. Salva i file includendo il numero della run nel nome
+            # Save files including the run number in the filename
             model_path = f"part1/models/policy_baseline_{baseline}_run_{run}.pth"
             torch.save(agent.policy.state_dict(), model_path)
-            
+
             np.save(f"part1/models/rewards_baseline_{baseline}_run_{run}.npy", np.array(rewards_log))
             np.save(f"part1/models/lengths_baseline_{baseline}_run_{run}.npy", np.array(lengths_log))
             np.save(f"part1/models/losses_baseline_{baseline}_run_{run}.npy", np.array(losses_log))
             np.save(f"part1/models/time_baseline_{baseline}_run_{run}.npy", np.array([elapsed]))
-            
+
             env.close()
+
+            if args.wandb:
+                wandb.finish()
 
 if __name__ == '__main__':
     main()
