@@ -57,6 +57,13 @@ def parse_args() -> argparse.Namespace:
         help="Random seed for reproducibility",
     )
     parser.add_argument(
+        "--mass-range",
+        nargs=2,
+        type=float,
+        default=[0.5, 6.0],
+        help="Min and Max mass for UDR, or global limits for ADR",
+    )
+    parser.add_argument(
         "--run-id",
         type=str,
         default=None,
@@ -76,7 +83,11 @@ def main() -> None:
         reward_type="dense",
     )
 
-    env = RandomizationWrapper(env, mode=args.sampling_strategy)
+    env = RandomizationWrapper(
+        env,
+        mass_range=tuple(args.mass_range),
+        mode=args.sampling_strategy,
+    )
 
     # Use the provided run_id if any, otherwise build one
     if args.run_id:
