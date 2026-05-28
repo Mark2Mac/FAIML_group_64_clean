@@ -7,6 +7,7 @@ import numpy as np
 import panda_gym  # type: ignore[import-not-found]
 from stable_baselines3 import SAC, PPO
 from stable_baselines3.common.callbacks import CheckpointCallback
+from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize  # wrap env to normalize obs and reward
 from rand_wrapper import RandomizationWrapper
 
 
@@ -83,18 +84,21 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    env = gym.make(
-        "PandaPush-v3",
-        render_mode="rgb_array",
-        type=args.env_type,
-        reward_type="dense",
-    )
+    def make_env():
+        e = gym.make(
+            "PandaPush-v3",
+            render_mode="rgb_array",
+            type=args.env_type,
+            reward_type="dense",
+        )
+        return RandomizationWrapper(
+            e,
+            mass_range=tuple(args.mass_range),
+            mode=args.sampling_strategy,
+            seed=args.seed,
+        )
 
-    env = RandomizationWrapper(
-        env,
-        mass_range=tuple(args.mass_range),
-        mode=args.sampling_strategy,
-    )
+    env = DummyVecEnv([make_env])
 
     # Use the provided run_id if any, otherwise build one
     if args.run_id:
@@ -103,6 +107,7 @@ def main() -> None:
         run_name = f"{args.algo}_push_{args.sampling_strategy}_{args.env_type}_seed{args.seed}"
     ckpt_path = os.path.join(args.ckpt_dir, run_name)
     os.makedirs(ckpt_path, exist_ok=True)
+    os.makedirs(args.model_dir, exist_ok=True)
 
     algo_class = PPO if args.algo == "ppo" else SAC
     batch_size = 256 if args.algo == "ppo" else 1024
@@ -113,21 +118,25 @@ def main() -> None:
         model = algo_class.load(args.resume_from, env=env)
     else:
         print("[train] Starting fresh")
+        # Normalize obs and reward: without this SAC/PPO converge slower
+        env = VecNormalize(env, norm_obs=True, norm_reward=True)
         model = algo_class("MultiInputPolicy", env, verbose=1, seed=args.seed, batch_size=batch_size)
 
-    # Save a checkpoint every 50k steps to prevent progress loss during long runs or multi run
+    # Save a checkpoint every 25k steps so that resume can pick up vec stats and (for SAC) the replay buffer
     ckpt_cb = CheckpointCallback(
-        save_freq=50_000,
+        save_freq=max(25_000 // env.num_envs, 1),
         save_path=ckpt_path,
         name_prefix="ckpt",
+        save_replay_buffer=True,
+        save_vecnormalize=True,
         verbose=1,
     )
 
     model.learn(total_timesteps=args.timesteps, callback=ckpt_cb, progress_bar=True)
 
-    os.makedirs(args.model_dir, exist_ok=True)
     save_name = os.path.join(args.model_dir, run_name)
     model.save(save_name)
+    env.save(save_name + "_vecnormalize.pkl")
     print(f"[train] Final model saved to {save_name}")
 
 
