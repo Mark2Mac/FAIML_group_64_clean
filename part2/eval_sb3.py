@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 
 import gymnasium as gym
@@ -8,7 +9,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 import panda_gym  # noqa: F401 - required so Panda envs are registered
 
 
-def evaluate(model_path: str, algo: str, n_episodes: int, deterministic: bool, render: bool, env_type: str) -> None:
+def evaluate(model_path: str, algo: str, n_episodes: int, deterministic: bool, render: bool, env_type: str, json_out: str = None) -> None:
     if not os.path.exists(model_path):
         raise FileNotFoundError(
             f"Model file not found: {model_path}. "
@@ -45,7 +46,7 @@ def evaluate(model_path: str, algo: str, n_episodes: int, deterministic: bool, r
 
         episode_returns.append(episode_return)
 
-        info = infos[0] if isinstance(infos, (list, tuple)) and len(infos) else {}
+        info = infos[0]
         if isinstance(info, dict) and "is_success" in info:
             successes.append(float(info["is_success"]))
 
@@ -61,9 +62,28 @@ def evaluate(model_path: str, algo: str, n_episodes: int, deterministic: bool, r
     print(f"Min return:  {returns.min():.3f}")
     print(f"Max return:  {returns.max():.3f}")
 
-    if successes:
-        success_rate = float(np.mean(successes))
+    success_rate = float(np.mean(successes)) if successes else None
+    if success_rate is not None:
         print(f"Success rate: {success_rate:.2%}")
+
+    if json_out:
+        out = {
+            "model_path": model_path,
+            "algo": algo,
+            "env_type": env_type,
+            "n_episodes": n_episodes,
+            "mean_return": float(returns.mean()),
+            "std_return": float(returns.std()),
+            "min_return": float(returns.min()),
+            "max_return": float(returns.max()),
+            "success_rate": success_rate,
+        }
+        out_dir = os.path.dirname(json_out)
+        if out_dir:
+            os.makedirs(out_dir, exist_ok=True)
+        with open(json_out, "w") as f:
+            json.dump(out, f, indent=2)
+        print(f"JSON saved: {json_out}")
 
 
 def parse_args() -> argparse.Namespace:
@@ -103,6 +123,12 @@ def parse_args() -> argparse.Namespace:
         choices=["source", "target"],
         help="Type of environment to evaluate on (default: target)",
     )
+    parser.add_argument(
+        "--json-out",
+        type=str,
+        default=None,
+        help="If set, dump the evaluation summary as JSON to this path",
+    )
     return parser.parse_args()
 
 
@@ -115,4 +141,5 @@ if __name__ == "__main__":
         deterministic=not args.stochastic,
         render=args.render,
         env_type=args.env_type,
+        json_out=args.json_out,
     )
