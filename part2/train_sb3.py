@@ -5,13 +5,20 @@ from collections import deque
 import gymnasium as gym
 import numpy as np
 import panda_gym  # type: ignore[import-not-found]
-from stable_baselines3 import SAC
+from stable_baselines3 import SAC, PPO
 from stable_baselines3.common.callbacks import CheckpointCallback
 from rand_wrapper import RandomizationWrapper
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Train SAC on PandaPush-v3")
+    parser = argparse.ArgumentParser(description="Train SAC or PPO on PandaPush-v3")
+    parser.add_argument(
+        "--algo",
+        type=str,
+        default="sac",
+        choices=["sac", "ppo"],
+        help="RL algorithm to use",
+    )
     parser.add_argument(
         "--sampling-strategy", "--strategy",
         type=str,
@@ -93,17 +100,20 @@ def main() -> None:
     if args.run_id:
         run_name = args.run_id
     else:
-        run_name = f"sac_push_{args.sampling_strategy}_{args.env_type}_seed{args.seed}"
+        run_name = f"{args.algo}_push_{args.sampling_strategy}_{args.env_type}_seed{args.seed}"
     ckpt_path = os.path.join(args.ckpt_dir, run_name)
     os.makedirs(ckpt_path, exist_ok=True)
+
+    algo_class = PPO if args.algo == "ppo" else SAC
+    batch_size = 256 if args.algo == "ppo" else 1024
 
     # Resume from checkpoint if provided, otherwise start fresh
     if args.resume_from and os.path.exists(args.resume_from):
         print(f"[train] Resuming from {args.resume_from}")
-        model = SAC.load(args.resume_from, env=env)
+        model = algo_class.load(args.resume_from, env=env)
     else:
         print("[train] Starting fresh")
-        model = SAC("MultiInputPolicy", env, verbose=1, seed=args.seed)
+        model = algo_class("MultiInputPolicy", env, verbose=1, seed=args.seed, batch_size=batch_size)
 
     # Save a checkpoint every 50k steps to prevent progress loss during long runs or multi run
     ckpt_cb = CheckpointCallback(
