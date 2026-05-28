@@ -3,11 +3,12 @@ import os
 
 import gymnasium as gym
 import numpy as np
-from stable_baselines3 import SAC
+from stable_baselines3 import SAC, PPO
+from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 import panda_gym  # noqa: F401 - required so Panda envs are registered
 
 
-def evaluate(model_path: str, n_episodes: int, deterministic: bool, render: bool, env_type: str) -> None:
+def evaluate(model_path: str, algo: str, n_episodes: int, deterministic: bool, render: bool, env_type: str) -> None:
     if not os.path.exists(model_path):
         raise FileNotFoundError(
             f"Model file not found: {model_path}. "
@@ -15,25 +16,36 @@ def evaluate(model_path: str, n_episodes: int, deterministic: bool, render: bool
         )
 
     render_mode = "human" if render else "rgb_array"
-    env = gym.make("PandaPush-v3", render_mode=render_mode, type=env_type, reward_type="dense")
-    model = SAC.load(model_path, env=env)
+    base_env = gym.make("PandaPush-v3", render_mode=render_mode, type=env_type, reward_type="dense")
+    env = DummyVecEnv([lambda: base_env])
+
+    # Reload the training-time obs normalization
+    vec_norm_path = model_path.replace(".zip", "_vecnormalize.pkl")
+    if os.path.exists(vec_norm_path):
+        env = VecNormalize.load(vec_norm_path, env)
+        env.training = False
+        env.norm_reward = False
+
+    algo_class = PPO if algo == "ppo" else SAC
+    model = algo_class.load(model_path, env=env)
 
     episode_returns = []
     successes = []
 
     for episode in range(1, n_episodes + 1):
-        obs, info = env.reset()
-        terminated = False
-        truncated = False
+        obs = env.reset()
+        done = False
         episode_return = 0.0
 
-        while not (terminated or truncated):
+        while not done:
             action, _ = model.predict(obs, deterministic=deterministic)
-            obs, reward, terminated, truncated, info = env.step(action)
-            episode_return += float(reward)
+            obs, reward, dones, infos = env.step(action)
+            done = bool(dones[0])
+            episode_return += float(reward[0])
 
         episode_returns.append(episode_return)
 
+        info = infos[0] if isinstance(infos, (list, tuple)) and len(infos) else {}
         if isinstance(info, dict) and "is_success" in info:
             successes.append(float(info["is_success"]))
 
@@ -55,12 +67,19 @@ def evaluate(model_path: str, n_episodes: int, deterministic: bool, render: bool
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Evaluate SAC on PandaPush-v3")
+    parser = argparse.ArgumentParser(description="Evaluate SAC or PPO on PandaPush-v3")
     parser.add_argument(
         "--model-path",
         type=str,
         required=True,
-        help="Path to a PPO model zip file (e.g., ppo_panda_push.zip)",
+        help="Path to a trained model zip file",
+    )
+    parser.add_argument(
+        "--algo",
+        type=str,
+        default="sac",
+        choices=["sac", "ppo"],
+        help="Algorithm used for the saved model",
     )
     parser.add_argument(
         "--episodes", 
@@ -91,6 +110,7 @@ if __name__ == "__main__":
     args = parse_args()
     evaluate(
         model_path=args.model_path,
+        algo=args.algo,
         n_episodes=args.episodes,
         deterministic=not args.stochastic,
         render=args.render,
