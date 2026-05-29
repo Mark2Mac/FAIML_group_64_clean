@@ -41,21 +41,6 @@ videos/
 *.env
 secrets/
 
-# RAG outputs (local-only, never commit) EXCEPT the team-shared store in tools/
-rag-store/
-!tools/rag-store/
-!tools/rag-store/**
-chroma_db/
-!tools/rag-store/chroma_db/
-!tools/rag-store/chroma_db/**
-.rag-venv/
-rag-venv/
-
-# Web scraping cache for the RAG (scripts/scrape-rag-sources.py output).
-# Public web content but specific to each member's last refresh - kept out of git.
-rag-web-cache/
-web-cache/
-
 # LaTeX / PDF generation auxiliary files (ignore junk, keep source)
 *.aux
 *.log
