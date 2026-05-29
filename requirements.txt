@@ -1,5 +1,17 @@
-gymnasium
+# FAIML group 64 - pinned environment so every machine runs the same stack (Python 3.12).
+# Install:
+#     pip install -r requirements.txt
+#     pip install -e part2/panda-gym --no-deps   # custom source/target Panda fork (3.0.8)
+#
+# Versions match the reported runs (read from the SB3 model system_info).
+stable-baselines3[extra]==2.8.0
+gymnasium==1.2.3
+numpy==2.0.2
+torch==2.10.0
 mujoco
-stable-baselines3[extra]>=2.0.0
+pybullet
+scipy
+matplotlib
 imageio
 opencv-python<4
+wandb
