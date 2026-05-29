@@ -90,7 +90,7 @@ def plot_learning_curves():
     ax.set_ylabel(f"Return (rolling avg, w={SMOOTH_WINDOW})")
     ax.set_title("Learning Curves — REINFORCE vs Actor-Critic")
     ax.legend(loc="lower right")
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(1000))
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(10000))
     fig.savefig(os.path.join(FIGURES_DIR, "learning_curves.pdf"))
     fig.savefig(os.path.join(FIGURES_DIR, "learning_curves.png"))
     print("  [OK] learning_curves.pdf")
@@ -118,7 +118,7 @@ def plot_episode_lengths():
     ax.set_ylabel(f"Episode Length (rolling avg, w={SMOOTH_WINDOW})")
     ax.set_title("Episode Lengths — REINFORCE vs Actor-Critic")
     ax.legend(loc="lower right")
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(1000))
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(10000))
     fig.savefig(os.path.join(FIGURES_DIR, "episode_lengths.pdf"))
     fig.savefig(os.path.join(FIGURES_DIR, "episode_lengths.png"))
     print("  [OK] episode_lengths.pdf")
@@ -159,7 +159,7 @@ def plot_test_returns():
 
 # ── 5. Losses ───────────────────────────────────────────────────────────────
 def plot_losses():
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 4))
     
     # REINFORCE Losses
     for name, cfg in ALGORITHMS.items():
@@ -199,13 +199,18 @@ def plot_losses():
         
         ax2.plot(ep, m_a, label="Actor Loss", color="#9b59b6", lw=2)
         ax2.fill_between(ep, m_a - s_a, m_a + s_a, alpha=0.15, color="#9b59b6")
-        ax2.plot(ep, m_c, label="Critic Loss", color="#e67e22", lw=2)
-        ax2.fill_between(ep, m_c - s_c, m_c + s_c, alpha=0.15, color="#e67e22")
+        ax3.plot(ep, m_c, label="Critic Loss", color="#e67e22", lw=2)
+        ax3.fill_between(ep, m_c - s_c, m_c + s_c, alpha=0.15, color="#e67e22")
         
     ax2.set_xlabel("Episode")
     ax2.set_ylabel("Loss (rolling avg)")
-    ax2.set_title("Actor-Critic Losses")
+    ax2.set_title("Actor-Critic Actor Loss")
     ax2.legend()
+    
+    ax3.set_xlabel("Episode")
+    ax3.set_ylabel("Loss (rolling avg)")
+    ax3.set_title("Actor-Critic Critic Loss")
+    ax3.legend()
     
     fig.tight_layout()
     fig.savefig(os.path.join(FIGURES_DIR, "losses.pdf"))
