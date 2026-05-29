@@ -35,6 +35,7 @@ def parse_args() -> argparse.Namespace:
         help="Min and Max mass for UDR, or global limits for ADR",
     )
     parser.add_argument("--run-id", type=str, default=None, help="Unique run identifier (checkpoint/model naming)")
+    parser.add_argument("--ckpt-freq", type=int, default=25_000, help="Save a checkpoint every N steps (0 to disable)")
     parser.add_argument("--device", type=str, default="auto", help="Torch device (auto/cpu/cuda)")
     parser.add_argument("--eval-target", action="store_true", help="Periodically evaluate on the deployment env")
     parser.add_argument("--eval-env-type", type=str, default="target", choices=["source", "target"])
@@ -135,17 +136,19 @@ def main() -> None:
         remaining = args.timesteps
         reset_num = True
 
-    # Save a checkpoint every 25k steps so that resume can pick up vec stats and (for SAC) the replay buffer
-    callbacks = [
-        CheckpointCallback(
-            save_freq=max(25_000 // env.num_envs, 1),
-            save_path=ckpt_path,
-            name_prefix="ckpt",
-            save_replay_buffer=True,
-            save_vecnormalize=True,
-            verbose=1,
+    # Periodic checkpoints
+    callbacks = []
+    if args.ckpt_freq > 0:
+        callbacks.append(
+            CheckpointCallback(
+                save_freq=max(args.ckpt_freq // env.num_envs, 1),
+                save_path=ckpt_path,
+                name_prefix="ckpt",
+                save_replay_buffer=True,
+                save_vecnormalize=True,
+                verbose=1,
+            )
         )
-    ]
 
     # Held-out eval on the deployment env; EvalCallback syncs the VecNormalize stats, so this is real transfer.
     if args.eval_target:
