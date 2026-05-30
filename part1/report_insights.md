@@ -22,7 +22,8 @@ This document contains all quantitative results, key insights, environment speci
 |---|---|---|
 | Learning rate | $3 \times 10^{-4}$ | Selected after preliminary sweeps at $10^{-3}$ and $7 \times 10^{-4}$, which exhibited excessive gradient variance and unstable convergence. The lower rate of $3 \times 10^{-4}$ provided a favorable trade-off between convergence speed and training stability. |
 | Discount factor $\gamma$ | 0.99 | Standard value for continuous control tasks with long horizons [1]. |
-| Hidden layers | 2 × 64 (tanh) | Compact architecture suitable for the 11-dim state space; orthogonal initialization with gain $\sqrt{2}$, policy head gain $0.01$ for near-zero initial actions. |
+| Hidden layers | 2 × 64 (tanh) | Compact architecture suitable for the 11-dim state space. |
+| Weight Init | Orthogonal | Replaced standard Normal initialization to prevent vanishing/exploding gradients. Hidden layers use gain $\sqrt{2}$ for Tanh activations, while the actor output layer uses a $0.01$ gain. This forces initial policy actions to be near zero, preventing the Hopper from crashing immediately and allowing stable initial exploration solely driven by the standard deviation. |
 | Initial $\sigma$ | 0.5 | Learned per-action std via `softplus`, initialized at 0.5 to ensure sufficient initial exploration without overly noisy actions. |
 | Training episodes | 50,000 | Sufficient for convergence assessment and to observe long-term stability/collapse phenomena. |
 | Independent runs | 3 | Seeds 43, 44, 45 — enough to estimate inter-run variance. |
