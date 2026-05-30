@@ -1,0 +1,52 @@
+# W&B Sweep for PPO hyperparameters on PandaPush-v3 (train on source, optimise transfer to target).
+# Usage:
+#   wandb sweep sweep_ppo.yaml      # creates the sweep, prints SWEEP_ID
+#   wandb agent <SWEEP_ID>          # launches trials
+# Metric is eval/mean_reward on the target env: the success rate saturates near 1.0 and does not discriminate.
+
+program: train_sb3.py
+method: bayes
+metric:
+  name: eval/mean_reward
+  goal: maximize
+
+command:
+  - ${interpreter}
+  - ${program}
+  - "--algo"
+  - "ppo"
+  - "--env-type"
+  - "source"
+  - "--sampling-strategy"
+  - "none"
+  - "--timesteps"
+  - "1000000"
+  - "--seed"
+  - "0"
+  - "--eval-target"
+  - "--eval-env-type"
+  - "target"
+  - "--ckpt-freq"
+  - "0"
+  - "--wandb"
+  - ${args}
+
+parameters:
+  lr:
+    distribution: log_uniform_values
+    min: 0.0001
+    max: 0.001
+  batch-size:
+    values: [64, 128, 256]
+  gamma:
+    values: [0.98, 0.99, 0.995]
+  ent-coef:
+    values: [0.0, 0.001, 0.01]
+  net-arch:
+    values: ["64,64", "256,256", "400,300"]
+
+# Kill clearly underperforming trials early
+early_terminate:
+  type: hyperband
+  min_iter: 100000
+  eta: 3
