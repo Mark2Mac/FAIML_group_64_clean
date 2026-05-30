@@ -42,6 +42,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--eval-freq", type=int, default=10_000)
     parser.add_argument("--wandb", action="store_true", help="Log to Weights & Biases")
     parser.add_argument("--wandb-project", type=str, default="faiml-group64-pandapush")
+    # Optional hyperparameter overrides; left as None they keep the SB3 defaults (baseline runs unchanged)
+    parser.add_argument("--lr", type=float, default=None)
+    parser.add_argument("--batch-size", type=int, default=None)
+    parser.add_argument("--gamma", type=float, default=None)
+    parser.add_argument("--ent-coef", type=str, default=None, help='"auto" or a float')
+    parser.add_argument("--net-arch", type=str, default=None, help='e.g. "256,256"')
+    parser.add_argument("--tau", type=float, default=None, help="SAC only")
+    parser.add_argument("--train-freq", type=int, default=None, help="SAC only")
+    parser.add_argument("--gradient-steps", type=int, default=None, help="SAC only")
     args, _ = parser.parse_known_args()
     return args
 
@@ -88,7 +97,7 @@ def main() -> None:
     os.makedirs(args.model_dir, exist_ok=True)
 
     algo_class = PPO if args.algo == "ppo" else SAC
-    batch_size = 256 if args.algo == "ppo" else 1024
+    batch_size = args.batch_size if args.batch_size is not None else (256 if args.algo == "ppo" else 1024)
 
     # Resume from checkpoint if provided, otherwise start fresh
     if args.resume_from and os.path.exists(args.resume_from):
@@ -129,10 +138,24 @@ def main() -> None:
         print("[train] Starting fresh")
         # Normalize obs and reward: without this SAC/PPO converge slower
         env = VecNormalize(env, norm_obs=True, norm_reward=True)
-        model = algo_class(
-            "MultiInputPolicy", env, verbose=1, seed=args.seed,
-            batch_size=batch_size, device=args.device, tensorboard_log=args.tb_dir,
-        )
+        kwargs = dict(verbose=1, seed=args.seed, batch_size=batch_size,
+                      device=args.device, tensorboard_log=args.tb_dir)
+        if args.lr is not None:
+            kwargs["learning_rate"] = args.lr
+        if args.gamma is not None:
+            kwargs["gamma"] = args.gamma
+        if args.ent_coef is not None:
+            kwargs["ent_coef"] = args.ent_coef if args.ent_coef == "auto" else float(args.ent_coef)
+        if args.net_arch is not None:
+            kwargs["policy_kwargs"] = dict(net_arch=[int(x) for x in args.net_arch.split(",")])
+        if args.algo == "sac":
+            if args.tau is not None:
+                kwargs["tau"] = args.tau
+            if args.train_freq is not None:
+                kwargs["train_freq"] = args.train_freq
+            if args.gradient_steps is not None:
+                kwargs["gradient_steps"] = args.gradient_steps
+        model = algo_class("MultiInputPolicy", env, **kwargs)
         remaining = args.timesteps
         reset_num = True
 

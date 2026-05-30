@@ -1,0 +1,54 @@
+# W&B Sweep for SAC hyperparameters on PandaPush-v3 (train on source, optimise transfer to target).
+# Usage:
+#   wandb sweep sweep_sac.yaml      # creates the sweep, prints SWEEP_ID
+#   wandb agent <SWEEP_ID>          # launches trials
+# Metric is eval/mean_reward on the target env: the success rate saturates near 1.0 and does not discriminate.
+
+program: train_sb3.py
+method: bayes
+metric:
+  name: eval/mean_reward
+  goal: maximize
+
+command:
+  - ${interpreter}
+  - ${program}
+  - "--algo"
+  - "sac"
+  - "--env-type"
+  - "source"
+  - "--sampling-strategy"
+  - "none"
+  - "--timesteps"
+  - "300000"
+  - "--seed"
+  - "0"
+  - "--eval-target"
+  - "--eval-env-type"
+  - "target"
+  - "--ckpt-freq"
+  - "0"
+  - "--wandb"
+  - ${args}
+
+parameters:
+  lr:
+    distribution: log_uniform_values
+    min: 0.0001
+    max: 0.001
+  batch-size:
+    values: [256, 512, 1024, 2048]
+  tau:
+    values: [0.005, 0.01, 0.02]
+  gamma:
+    values: [0.98, 0.99, 0.995]
+  gradient-steps:
+    values: [1, 2, 4]
+  net-arch:
+    values: ["256,256", "400,300", "256,256,256"]
+
+# Kill clearly underperforming trials early
+early_terminate:
+  type: hyperband
+  min_iter: 50000
+  eta: 3
