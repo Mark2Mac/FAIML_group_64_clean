@@ -1,52 +1,58 @@
-# W&B Sweep for PPO hyperparameters on PandaPush-v3 (train on source, optimise transfer to target).
+# W&B Sweep config for PPO hyperparameter search on PandaPush-v3
 # Usage:
-#   wandb sweep sweep_ppo.yaml      # creates the sweep, prints SWEEP_ID
-#   wandb agent <SWEEP_ID>          # launches trials
-# Metric is eval/mean_reward on the target env: the success rate saturates near 1.0 and does not discriminate.
+#   wandb sweep sweep_ppo.yaml          # creates sweep, prints SWEEP_ID
+#   wandb agent <SWEEP_ID>              # launches trials on this machine
+#
+# Each trial runs train_ppo.py with sampled hyperparameters.
+# Use --timesteps 200000 for faster sweeps, retrain best config at 500k.
 
-program: train_sb3.py
-method: bayes
+program: train_ppo.py
+method: bayes       # bayesian optimization (smarter than random/grid)
+command:
+  - ..\venv\Scripts\python.exe
+  - ${program}
+  - ${args}
 metric:
-  name: eval/mean_reward
+  name: rollout/success_rate
   goal: maximize
 
-command:
-  - ${interpreter}
-  - ${program}
-  - "--algo"
-  - "ppo"
-  - "--env-type"
-  - "source"
-  - "--sampling-strategy"
-  - "none"
-  - "--timesteps"
-  - "1000000"
-  - "--seed"
-  - "0"
-  - "--eval-target"
-  - "--eval-env-type"
-  - "target"
-  - "--ckpt-freq"
-  - "0"
-  - "--wandb"
-  - ${args}
-
 parameters:
-  lr:
+  learning_rate:
     distribution: log_uniform_values
-    min: 0.0001
-    max: 0.001
-  batch-size:
+    min: 1e-4
+    max: 1e-3
+  n_steps:
+    values: [512, 1024, 2048]
+  batch_size:
     values: [64, 128, 256]
+  n_epochs:
+    values: [10]
+  clip_range:
+    values: [0.1, 0.2, 0.3]
   gamma:
-    values: [0.98, 0.99, 0.995]
-  ent-coef:
-    values: [0.0, 0.001, 0.01]
-  net-arch:
-    values: ["64,64", "256,256", "400,300"]
+    values: [0.99]
+  gae_lambda:
+    values: [0.97]
+  ent_coef:
+    values: [0.0, 0.01]
+  use_sde:
+    values: [True, False]
+  sde_sample_freq:
+    values: [-1, 1, 4]
+  target_kl:
+    values: [0.05]
+  
 
-# Kill clearly underperforming trials early
+# Fixed params for sweep runs (longer timesteps for convergence)
+  timesteps:
+    value: 1000000
+  env_type:
+    value: "source"
+  sampling_strategy:
+    value: "none"
+
+# Early termination: kill underperforming runs
 early_terminate:
   type: hyperband
-  min_iter: 100000
+  min_iter: 200000
   eta: 3
