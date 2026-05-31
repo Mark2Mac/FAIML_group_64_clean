@@ -14,6 +14,9 @@ def main():
     parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate for both actor and critic")
     parser.add_argument("--wandb", action="store_true", help="Enable Weights & Biases logging")
     parser.add_argument("--project", type=str, default="hopper-faiml", help="W&B project name")
+    parser.add_argument("--gae-lambda", type=float, default=0.95, help="GAE lambda")
+    parser.add_argument("--sigma-floor", type=float, default=0.1, help="Minimum policy std added after softplus")
+
     args = parser.parse_args()
 
     NUM_RUNS = args.runs
@@ -40,7 +43,9 @@ def main():
                     "learning_rate": args.lr,
                     "episodes": NUM_EPISODES,
                     "run_id": run,
-                    "seed": 42 + run
+                    "seed": 42 + run,
+                    "gae_lambda": args.gae_lambda,
+                    "sigma_floor": args.sigma_floor,
                 },
                 reinit=True
             )
@@ -50,13 +55,17 @@ def main():
         np.random.seed(seed)
 
         env = gym.make('Hopper-v4')
-        policy = Policy(env.observation_space.shape[0], env.action_space.shape[0])
-        agent = Agent(policy, lr=args.lr)
+        policy = Policy(env.observation_space.shape[0], env.action_space.shape[0], sigma_floor=args.sigma_floor)
+        agent = Agent(policy, lr=args.lr, gae_lambda=args.gae_lambda)
 
         rewards_log = []
         lengths_log = []
         actor_losses_log = []
         critic_losses_log = []
+
+        # [NEW]
+        diagnostics_log = []
+        
         best_avg_reward = -float('inf')
         start_time = time.time()
 
@@ -82,11 +91,14 @@ def main():
                 if done:
                     break
 
-            actor_loss, critic_loss = agent.update_policy(actor_critic=True)
+            actor_loss, critic_loss, diagnostics = agent.update_policy(actor_critic=True)
             rewards_log.append(episode_reward)
             lengths_log.append(step_count)
             actor_losses_log.append(actor_loss)
             critic_losses_log.append(critic_loss)
+            
+            # [NEW]
+            diagnostics_log.append(diagnostics)
 
             avg100 = np.mean(rewards_log[-100:])
 
@@ -103,7 +115,22 @@ def main():
                     "actor_loss": actor_loss,
                     "critic_loss": critic_loss,
                     "avg_reward_100": avg100,
-                    "best_avg_reward": best_avg_reward
+                    "best_avg_reward": best_avg_reward,
+
+                    # [NEW] additional actor critic diagnostics
+                    "value_mean": diagnostics["value_mean"],
+                    "value_std": diagnostics["value_std"],
+                    "raw_adv_mean": diagnostics["raw_adv_mean"],
+                    "raw_adv_std": diagnostics["raw_adv_std"],
+                    "raw_adv_min": diagnostics["raw_adv_min"],
+                    "raw_adv_max": diagnostics["raw_adv_max"],
+                    "norm_adv_mean": diagnostics["norm_adv_mean"],
+                    "norm_adv_std": diagnostics["norm_adv_std"],
+                    "norm_adv_min": diagnostics["norm_adv_min"],
+                    "norm_adv_max": diagnostics["norm_adv_max"],
+                    "sigma_mean": diagnostics["sigma_mean"],
+                    "sigma_min": diagnostics["sigma_min"],
+                    "sigma_max": diagnostics["sigma_max"],
                 })
 
             if episode % 100 == 0:
@@ -120,6 +147,10 @@ def main():
         np.save(f"part1/models/lengths_actor_critic_run_{run}.npy", np.array(lengths_log))
         np.save(f"part1/models/actor_losses_actor_critic_run_{run}.npy", np.array(actor_losses_log))
         np.save(f"part1/models/critic_losses_actor_critic_run_{run}.npy", np.array(critic_losses_log))
+        
+        # [NEW]
+        np.save(f"part1/models/diagnostics_actor_critic_run_{run}.npy", np.array(diagnostics_log, dtype=object))
+
         np.save(f"part1/models/time_actor_critic_run_{run}.npy", np.array([elapsed]))
         env.close()
 

@@ -14,10 +14,11 @@ def discount_rewards(r, gamma):
 
 
 class Policy(torch.nn.Module):
-    def __init__(self, state_space, action_space):
+    def __init__(self, state_space, action_space, sigma_floor=0.1):
         super().__init__()
         self.state_space = state_space
         self.action_space = action_space
+        self.sigma_floor = sigma_floor
         self.hidden = 64
         self.tanh = torch.nn.Tanh()
 
@@ -66,7 +67,7 @@ class Policy(torch.nn.Module):
         x_actor = self.tanh(self.fc2_actor(x_actor))
         action_mean = self.fc3_actor_mean(x_actor)
 
-        sigma = self.sigma_activation(self.sigma) + 1e-3
+        sigma = self.sigma_activation(self.sigma) + self.sigma_floor
         normal_dist = Normal(action_mean, sigma)
 
 
@@ -82,12 +83,14 @@ class Policy(torch.nn.Module):
 
 
 class Agent(object):
-    def __init__(self, policy, device='cpu', lr=1e-3):
+    def __init__(self, policy, device='cpu', lr=1e-3, gae_lambda=0.95):
         self.train_device = device
         self.policy = policy.to(self.train_device)
         self.optimizer = torch.optim.Adam(policy.parameters(), lr=lr)
 
         self.gamma = 0.99
+        self.gae_lambda = gae_lambda
+        
         self.states = []
         self.next_states = []
         self.action_log_probs = []
@@ -118,14 +121,60 @@ class Agent(object):
             _, next_values = self.policy(next_states)
             values = values.squeeze(-1)
             next_values = next_values.squeeze(-1)
-            targets = rewards + self.gamma * next_values.detach() * (1 - done)
-            advantages = targets - values
-            advantages = (advantages - advantages.mean()) / (advantages.std() + 1e-8)
+            
+            td_targets = rewards + self.gamma * next_values.detach() * (1 - done)
+            td_errors = td_targets - values.detach()
+
+            raw_advantages = torch.zeros_like(rewards)
+            gae = 0.0
+
+            for t in reversed(range(len(rewards))):
+                gae = td_errors[t] + self.gamma * self.gae_lambda * (1 - done[t]) * gae
+                raw_advantages[t] = gae
+
+            targets = raw_advantages + values.detach()
+
+            raw_adv_mean = raw_advantages.mean()
+            raw_adv_std = raw_advantages.std()
+            raw_adv_min = raw_advantages.min()
+            raw_adv_max = raw_advantages.max()
+
+            advantages = (raw_advantages - raw_adv_mean) / (raw_adv_std + 1e-8)
+
+            norm_adv_mean = advantages.mean()
+            norm_adv_std = advantages.std()
+            norm_adv_min = advantages.min()
+            norm_adv_max = advantages.max()
             
             actor_loss = -torch.mean(advantages.detach() * action_log_probs)
             critic_loss = F.mse_loss(values, targets.detach())
 
             loss = actor_loss + critic_loss
+
+            # check:
+                # value mean, std
+                # raw_adv_mean, raw_adv_std, raw_adv_min, raw_adv_max
+                # norm_adv_mean, norm_adv_std, norm_adv_min, norm_adv_max
+                # sigma mean, min and max
+            sigma = self.policy.sigma_activation(self.policy.sigma).detach() + self.policy.sigma_floor
+
+            diagnostics = {
+                "value_mean": values.mean().item(),
+                "value_std": values.std().item(),
+                "raw_adv_mean": raw_adv_mean.item(),
+                "raw_adv_std": raw_adv_std.item(),
+                "raw_adv_min": raw_adv_min.item(),
+                "raw_adv_max": raw_adv_max.item(),
+                "norm_adv_mean": norm_adv_mean.item(),
+                "norm_adv_std": norm_adv_std.item(),
+                "norm_adv_min": norm_adv_min.item(),
+                "norm_adv_max": norm_adv_max.item(),
+                "sigma_mean": sigma.mean().item(),
+                "sigma_min": sigma.min().item(),
+                "sigma_max": sigma.max().item(),
+            }
+                
+            
 
         else:
             #
@@ -143,7 +192,7 @@ class Agent(object):
         self.optimizer.step()
 
         if actor_critic:
-            return actor_loss.item(), critic_loss.item()
+            return actor_loss.item(), critic_loss.item(), diagnostics
         else:
             return loss.item()
 
