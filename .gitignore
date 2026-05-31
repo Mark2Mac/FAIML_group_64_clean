@@ -5,8 +5,6 @@ env/
 
 # Modelli salvati
 *.pth
-models/
-part1/models/
 part1/models_backup/
 part1/render_best_model.py
 
