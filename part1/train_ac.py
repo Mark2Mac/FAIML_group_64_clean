@@ -4,8 +4,18 @@ import argparse
 import gymnasium as gym
 import numpy as np
 import torch
+import random
 
 from agent import Agent, Policy
+
+def set_seed(seed):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
 
 def main():
     parser = argparse.ArgumentParser(description="Train Actor-Critic on Hopper-v4")
@@ -16,6 +26,7 @@ def main():
     parser.add_argument("--project", type=str, default="hopper-faiml", help="W&B project name")
     parser.add_argument("--gae-lambda", type=float, default=0.95, help="GAE lambda")
     parser.add_argument("--sigma-floor", type=float, default=0.1, help="Minimum policy std added after softplus")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
 
     args = parser.parse_args()
 
@@ -50,9 +61,9 @@ def main():
                 reinit=True
             )
 
-        seed = 42 + run
-        torch.manual_seed(seed)
-        np.random.seed(seed)
+        seed = args.seed + run
+        set_seed(seed)
+        wandb.config.update({"seed": seed})
 
         env = gym.make('Hopper-v4')
         policy = Policy(env.observation_space.shape[0], env.action_space.shape[0], sigma_floor=args.sigma_floor)
