@@ -64,7 +64,7 @@ def main():
                 entity="s355100-politecnico-di-torino",
                 project=args.project,
                 group="Actor-Critic",
-                name=f"AC_run_{run}_lr_{args.lr}_entropy_{args.entropy_coef}",
+                name=f"AC_run_{run}_lr_{args.lr}_entropy_{args.entropy_coef}_seed_{args.seed}",
                 config={
                     "algorithm": "Actor-Critic",
                     "learning_rate": args.lr,
