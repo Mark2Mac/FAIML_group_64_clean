@@ -33,11 +33,9 @@ def main():
 
     parser.add_argument("--entropy-coef", type=float, default=0.0, help="Entropy coefficient")
 
-    parser.add_argument("--lr-scheduler", action="store_true", help="Enable ReduceLROnPlateau LR scheduler")
-    parser.add_argument("--lr-factor", type=float, default=0.5, help="LR reduction factor")
-    parser.add_argument("--lr-patience", type=int, default=2000, help="Episodes without improvement before LR reduction")
-    parser.add_argument("--lr-threshold", type=float, default=50.0, help="Minimum avg100 improvement to avoid LR reduction")
-    parser.add_argument("--min-lr", type=float, default=1e-5, help="Minimum learning rate")
+    parser.add_argument("--lr-scheduler", action="store_true", help="Enable linear LR decay scheduler")
+    parser.add_argument("--lr-decay-start", type=int, default=10000, help="Episode at which LR starts decaying")
+    parser.add_argument("--min-lr", type=float, default=1e-5, help="Minimum learning rate at end of training")
 
     args = parser.parse_args()
 
@@ -52,9 +50,7 @@ def main():
 
     print(
         f" LR Scheduler: {args.lr_scheduler} | "
-        f"Factor: {args.lr_factor} | "
-        f"Patience: {args.lr_patience} | "
-        f"Threshold: {args.lr_threshold} | "
+        f"Decay Start: {args.lr_decay_start} | "
         f"Min LR: {args.min_lr}"
     )
     print(f"{'='*40}")
@@ -83,9 +79,7 @@ def main():
                     "entropy_coef": args.entropy_coef,
 
                     "lr_scheduler": args.lr_scheduler,
-                    "lr_factor": args.lr_factor,
-                    "lr_patience": args.lr_patience,
-                    "lr_threshold": args.lr_threshold,
+                    "lr_decay_start": args.lr_decay_start,
                     "min_lr": args.min_lr,
                 },
                 reinit=True
@@ -102,14 +96,19 @@ def main():
         
         scheduler = None
         if args.lr_scheduler:
-            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-                agent.optimizer,
-                mode="max",
-                factor=args.lr_factor,
-                patience=args.lr_patience,
-                threshold=args.lr_threshold,
-                threshold_mode="abs",
-                min_lr=args.min_lr
+            min_lr_ratio = args.min_lr / args.lr  # ratio at the end of training
+            decay_start = args.lr_decay_start
+            decay_episodes = max(NUM_EPISODES - decay_start, 1)
+
+            def lr_lambda(episode):
+                if episode < decay_start:
+                    return 1.0  # constant LR
+                # linear decay from 1.0 down to min_lr_ratio
+                progress = (episode - decay_start) / decay_episodes
+                return max(1.0 - progress * (1.0 - min_lr_ratio), min_lr_ratio)
+
+            scheduler = torch.optim.lr_scheduler.LambdaLR(
+                agent.optimizer, lr_lambda=lr_lambda
             )
 
         rewards_log = []
@@ -157,7 +156,7 @@ def main():
             avg100 = np.mean(rewards_log[-100:])
 
             if scheduler is not None:
-                scheduler.step(avg100)
+                scheduler.step()
             current_lr = agent.optimizer.param_groups[0]['lr']
 
 
