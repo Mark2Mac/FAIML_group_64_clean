@@ -1,224 +1,265 @@
 import argparse
-from collections import deque
 import os
+import re
 import time
 
 import torch
-import wandb
 import gymnasium as gym
-import numpy as np
 import panda_gym  # type: ignore[import-not-found]
 from stable_baselines3 import PPO
+from stable_baselines3.common.callbacks import CheckpointCallback, EvalCallback
 from stable_baselines3.common.vec_env import SubprocVecEnv, VecNormalize
 from stable_baselines3.common.monitor import Monitor
-from wandb.integration.sb3 import WandbCallback
-from rand_wrapper import RandomizationWrapper
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train PPO on PandaPush-v3")
-    parser.add_argument(
-        "--sampling_strategy",
-        type=str,
-        default="none",
-        choices=["none", "udr", "adr"],
-        help="Sampling strategy for the object mass",
-    )
-    parser.add_argument(
-        "--env_type",
-        type=str,
-        default="source",
-        choices=["source", "target"],
-        help="PandaPush environment type",
-    )
-    parser.add_argument(
-        "--timesteps",
-        type=int,
-        default=1_000_000,
-        help="Number of training timesteps",
-    )
-    parser.add_argument(
-        "--device",
-        type=str,
-        default="msi",
-        help="device used (default: msi)", #msi is francesco's laptop, for fast training. remember to change
-    )
+    parser.add_argument("--env-type", type=str, default="source", choices=["source", "target"],
+                        help="PandaPush environment type")
+    parser.add_argument("--timesteps", type=int, default=1_000_000, help="Number of training timesteps")
+    parser.add_argument("--n-envs", type=int, default=1,
+                        help="Number of parallel environments (SubprocVecEnv)")
+    parser.add_argument("--model-dir", type=str, default=".", help="Directory to save the final model")
+    parser.add_argument("--ckpt-dir", type=str, default=".", help="Directory to save periodic checkpoints")
+    parser.add_argument("--tb-dir", type=str, default=None, help="TensorBoard log directory (disabled if unset)")
+    parser.add_argument("--resume-from", type=str, default=None, help="Checkpoint .zip to resume from")
+    parser.add_argument("--seed", type=int, default=0, help="Random seed for reproducibility")
+    parser.add_argument("--run-id", type=str, default=None, help="Unique run identifier (checkpoint/model naming)")
+    parser.add_argument("--ckpt-freq", type=int, default=25_000,
+                        help="Save a checkpoint every N steps (0 to disable)")
+    parser.add_argument("--device", type=str, default="auto", help="Torch device (auto/cpu/cuda)")
+    parser.add_argument("--eval-target", action="store_true", help="Periodically evaluate on the deployment env")
+    parser.add_argument("--eval-env-type", type=str, default="target", choices=["source", "target"])
+    parser.add_argument("--eval-freq", type=int, default=10_000)
+    parser.add_argument("--wandb", action="store_true", help="Log to Weights & Biases")
+    parser.add_argument("--wandb-project", type=str, default="faiml-group64-ppo",
+                        help="W&B project name")
+    parser.add_argument("--max-episode-steps", type=int, default=100,
+                        help="Maximum number of steps per episode (default: 100, panda-gym default is 50)")
 
     # PPO hyperparameters
-    parser.add_argument("--learning_rate", type=float, default=3e-4, help="Learning rate")
-    parser.add_argument("--n_steps", type=int, default=1024, help="Rollout buffer size per env")
-    parser.add_argument("--batch_size", type=int, default=256, help="Minibatch size for PPO updates")
-    parser.add_argument("--n_epochs", type=int, default=10, help="Number of epochs per PPO update")
-    parser.add_argument("--clip_range", type=float, default=0.2, help="PPO clipping parameter")
+    parser.add_argument("--learning-rate", type=float, default=3e-4, help="Learning rate")
+    parser.add_argument("--n-steps", type=int, default=1024, help="Rollout buffer size per env")
+    parser.add_argument("--batch-size", type=int, default=256, help="Minibatch size for PPO updates")
+    parser.add_argument("--n-epochs", type=int, default=10, help="Number of epochs per PPO update")
+    parser.add_argument("--clip-range", type=float, default=0.2, help="PPO clipping parameter")
     parser.add_argument("--gamma", type=float, default=0.99, help="Discount factor")
-    parser.add_argument("--gae_lambda", type=float, default=0.97, help="GAE lambda for advantage estimation")
-    parser.add_argument("--ent_coef", type=float, default=0.01, help="Entropy coefficient for exploration")
-    parser.add_argument("--target_kl", type=float, default=0.05, help="Limit the KL divergence between updates")
-    parser.add_argument("--use_sde", type=lambda x: str(x).lower() in ["true", "1", "yes"], default=False, help="Use generalized State-Dependent Exploration")
-    parser.add_argument("--sde_sample_freq", type=int, default=1, help="Sample frequency for gSDE")
-    parser.add_argument(
-        "--no_save",
-        action="store_true",
-        help="Skip saving the final model and VecNormalize stats",
-    )
-    parser.add_argument(
-        "--no_wandb",
-        action="store_true",
-        help="Disable Weights & Biases logging (all wandb calls become no-ops)",
-    )
-    parser.add_argument(
-        "--seed",
-        type=int,
-        default=0,
-        help="Random seed for reproducibility",
-    )
-    parser.add_argument(
-        "--max_episode_steps",
-        type=int,
-        default=100,
-        help="Maximum number of steps per episode (default: 100, panda-gym default is 50)",
-    )
-    parser.add_argument(
-        "--no_checkpoint",
-        action="store_true",
-        help="Disable periodic checkpointing during training",
-    )
+    parser.add_argument("--gae-lambda", type=float, default=0.97, help="GAE lambda for advantage estimation")
+    parser.add_argument("--ent-coef", type=float, default=0.01, help="Entropy coefficient for exploration")
+    parser.add_argument("--target-kl", type=float, default=0.05, help="Limit the KL divergence between updates")
+    parser.add_argument("--use-sde", action="store_true", help="Use generalized State-Dependent Exploration")
+    parser.add_argument("--sde-sample-freq", type=int, default=1, help="Sample frequency for gSDE")
+    parser.add_argument("--net-arch", type=str, default="256,256",
+                        help='Comma-separated hidden layer sizes, e.g. "256,256"')
 
     return parser.parse_args()
+
+
+def make_env(env_type: str, seed: int, rank: int, max_episode_steps: int):
+    """Factory that returns a thunk for SubprocVecEnv."""
+    def _init():
+        e = gym.make(
+            "PandaPush-v3",
+            render_mode=None,
+            type=env_type,
+            reward_type="dense",
+            max_episode_steps=max_episode_steps,
+        )
+        e.reset(seed=seed + rank)
+        return Monitor(e)
+    return _init
 
 
 def main() -> None:
     args = parse_args()
 
-    if args.device == "msi":
-        device = "cpu"
-        num_envs = 16  # Efficient parallelization for 20-core CPU
-        
-        # Optimize CPU threads for parallel environments to avoid contention
-        os.environ["OMP_NUM_THREADS"] = "1"
-        os.environ["MKL_NUM_THREADS"] = "1"
-        torch.set_num_threads(1)
+    # Optimise CPU threads for parallel envs (avoids contention with SubprocVecEnv)
+    os.environ["OMP_NUM_THREADS"] = "1"
+    os.environ["MKL_NUM_THREADS"] = "1"
+    torch.set_num_threads(1)
+
+    num_envs = args.n_envs
+
+    # ── Run name ──────────────────────────────────────────────────────────
+    if args.run_id:
+        run_name = args.run_id
     else:
-        device = args.device
-        num_envs = 4  # Default fallback
+        run_name = f"ppo_push_{args.env_type}_seed{args.seed}"
 
-    def make_env(rank: int, seed: int):
-        def _init():
-            e = gym.make(
-                "PandaPush-v3",
-                render_mode=None,
-                type=args.env_type,
-                reward_type="dense",
-                max_episode_steps=args.max_episode_steps,
+    # ── Optional W&B ──────────────────────────────────────────────────────
+    wandb_run = None
+    if args.wandb:
+        import wandb
+        if args.tb_dir is None:
+            args.tb_dir = os.path.join("runs", "tb")
+        wandb_run = wandb.init(
+            project=args.wandb_project,
+            name=run_name,
+            group=f"ppo_{args.env_type}",
+            tags=["ppo", args.env_type, f"seed{args.seed}"],
+            config={
+                "algo": "PPO",
+                "env_type": args.env_type,
+                "seed": args.seed,
+                "timesteps": args.timesteps,
+                "num_envs": num_envs,
+                "learning_rate": args.learning_rate,
+                "n_steps": args.n_steps,
+                "batch_size": args.batch_size,
+                "n_epochs": args.n_epochs,
+                "clip_range": args.clip_range,
+                "gamma": args.gamma,
+                "gae_lambda": args.gae_lambda,
+                "ent_coef": args.ent_coef,
+                "target_kl": args.target_kl,
+                "use_sde": args.use_sde,
+                "sde_sample_freq": args.sde_sample_freq,
+                "max_episode_steps": args.max_episode_steps,
+                "net_arch": args.net_arch,
+            },
+            sync_tensorboard=True,
+        )
+
+    # ── Environment ───────────────────────────────────────────────────────
+    env = SubprocVecEnv([
+        make_env(args.env_type, args.seed, i, args.max_episode_steps)
+        for i in range(num_envs)
+    ])
+
+    # ── Checkpoint dirs ───────────────────────────────────────────────────
+    ckpt_path = os.path.join(args.ckpt_dir, run_name)
+    os.makedirs(ckpt_path, exist_ok=True)
+    os.makedirs(args.model_dir, exist_ok=True)
+
+    # ── Parse network architecture ────────────────────────────────────────
+    net_arch_list = [int(x) for x in args.net_arch.split(",")]
+    policy_kwargs = dict(net_arch=dict(pi=net_arch_list, vf=net_arch_list))
+
+    # ── Resume or fresh start ─────────────────────────────────────────────
+    if args.resume_from and os.path.exists(args.resume_from):
+        print(f"[train_ppo] Resuming from {args.resume_from}")
+        basename = os.path.basename(args.resume_from)
+        m = re.match(r"(.+)_(\d+)_steps\.zip$", basename)
+        if m:
+            prefix, step = m.group(1), m.group(2)
+            ckpt_dir_resume = os.path.dirname(args.resume_from)
+            vec_norm_path = os.path.join(ckpt_dir_resume, f"{prefix}_vecnormalize_{step}_steps.pkl")
+        else:
+            vec_norm_path = args.resume_from.replace(".zip", "_vecnormalize.pkl")
+
+        if not os.path.exists(vec_norm_path):
+            raise FileNotFoundError(
+                f"VecNormalize stats missing next to checkpoint: {vec_norm_path}. "
+                "Without them obs end up in the wrong scale."
             )
-            e.reset(seed=seed + rank)
-            return Monitor(e)
-        return _init
+        env = VecNormalize.load(vec_norm_path, env)
+        env.training = True
+        env.norm_reward = True
+        model = PPO.load(args.resume_from, env=env, tensorboard_log=args.tb_dir)
 
-    env = SubprocVecEnv([make_env(i, args.seed) for i in range(num_envs)])
-    env = VecNormalize(env, training=True)
+        remaining = max(0, args.timesteps - model.num_timesteps)
+        reset_num = False
+    else:
+        print("[train_ppo] Starting fresh")
+        env = VecNormalize(env, norm_obs=True, norm_reward=True)
+        model = PPO(
+            policy="MultiInputPolicy",
+            env=env,
+            device=args.device,
+            verbose=1,
+            seed=args.seed,
+            tensorboard_log=args.tb_dir,
+            learning_rate=args.learning_rate,
+            n_steps=args.n_steps,
+            batch_size=args.batch_size,
+            n_epochs=args.n_epochs,
+            clip_range=args.clip_range,
+            gamma=args.gamma,
+            gae_lambda=args.gae_lambda,
+            ent_coef=args.ent_coef,
+            target_kl=args.target_kl,
+            use_sde=args.use_sde,
+            sde_sample_freq=args.sde_sample_freq,
+            policy_kwargs=policy_kwargs,
+        )
+        remaining = args.timesteps
+        reset_num = True
 
-    #TODO: add randomization wrapper here
-    #TODO: create model and train it
+    # ── Callbacks ─────────────────────────────────────────────────────────
+    callbacks = []
+    if args.ckpt_freq > 0:
+        callbacks.append(
+            CheckpointCallback(
+                save_freq=max(args.ckpt_freq // num_envs, 1),
+                save_path=ckpt_path,
+                name_prefix="ckpt",
+                save_replay_buffer=False,
+                save_vecnormalize=True,
+                verbose=1,
+            )
+        )
 
-    config = {
-        "algo": "PPO",
-        "policy": "MultiInputPolicy",
-        "env_type": args.env_type,
-        "sampling_strategy": args.sampling_strategy,
-        "total_timesteps": args.timesteps,
-        "seed": args.seed,
-        "device": device,
-        "num_envs": num_envs,
-        # PPO hyperparameters (CLI defaults, overridden by sweep agent)
-        "learning_rate": args.learning_rate,
-        "n_steps": args.n_steps,
-        "batch_size": args.batch_size,
-        "n_epochs": args.n_epochs,
-        "clip_range": args.clip_range,
-        "gamma": args.gamma,
-        "gae_lambda": args.gae_lambda,
-        "ent_coef": args.ent_coef,
-        "target_kl": args.target_kl,
-        "use_sde": args.use_sde,
-        "sde_sample_freq": args.sde_sample_freq,
-        # environment hyperparameters
-        "max_episode_steps": args.max_episode_steps,
-    }
-    run = wandb.init(
-        project="faiml-group64-ppo",
-        config=config,
-        sync_tensorboard=True,
-        save_code=True,
-        mode="disabled" if args.no_wandb else "online",
-    )
+    if args.eval_target:
+        eval_env = SubprocVecEnv([
+            make_env(args.eval_env_type, args.seed + 10_000, 0, args.max_episode_steps)
+        ])
+        eval_env = VecNormalize(eval_env, norm_obs=True, norm_reward=False, training=False)
+        callbacks.append(
+            EvalCallback(
+                eval_env,
+                best_model_save_path=ckpt_path,
+                eval_freq=max(args.eval_freq // num_envs, 1),
+                n_eval_episodes=50,
+                deterministic=True,
+                render=False,
+                verbose=1,
+            )
+        )
 
-    # Read from wandb.config so sweep agent can override CLI defaults
-    cfg = wandb.config
+    if args.wandb:
+        from wandb.integration.sb3 import WandbCallback
+        callbacks.append(WandbCallback(verbose=1))
 
-    save_name = f"ppo_push_{cfg.sampling_strategy}_{cfg.env_type}_seed{cfg.seed}_{cfg.total_timesteps // 1000}k_{run.id}"
-    run.name = save_name
-
-    model = PPO(
-        policy="MultiInputPolicy",
-        env=env,
-        device=device,
-        verbose=1,
-        seed=args.seed,
-        tensorboard_log=f"runs/{run.id}",
-        learning_rate=cfg.learning_rate,
-        n_steps=cfg.n_steps,
-        batch_size=cfg.batch_size,
-        n_epochs=cfg.n_epochs,
-        clip_range=cfg.clip_range,
-        gamma=cfg.gamma,
-        gae_lambda=cfg.gae_lambda,
-        ent_coef=cfg.ent_coef,
-        target_kl=cfg.target_kl,
-        use_sde=cfg.use_sde,
-        sde_sample_freq=cfg.sde_sample_freq,
-        policy_kwargs=dict(net_arch=dict(pi=[256, 256], vf=[256, 256]))
-    )
-
+    # ── Train ─────────────────────────────────────────────────────────────
     t_start = time.time()
 
     model.learn(
-        total_timesteps=cfg.total_timesteps,
-        callback=WandbCallback(
-            verbose=2,
-        ),
-        reset_num_timesteps=False,
+        total_timesteps=remaining,
+        callback=callbacks,
         progress_bar=True,
-        tb_log_name=save_name,
+        reset_num_timesteps=reset_num,
+        tb_log_name=run_name,
     )
 
     elapsed = time.time() - t_start
-    steps_per_sec = cfg.total_timesteps / elapsed
+    steps_per_sec = remaining / elapsed if elapsed > 0 else 0
     minutes = elapsed / 60
 
     print(f"\n{'='*50}")
     print(f"Training complete.")
-    print(f"Total timesteps:  {cfg.total_timesteps:,}")
+    print(f"Total timesteps:  {remaining:,}")
     print(f"Elapsed time:     {minutes:.1f} min ({elapsed:.0f} s)")
     print(f"Throughput:       {steps_per_sec:.0f} steps/s")
     print(f"{'='*50}\n")
 
-    wandb.log({
-        "timing/elapsed_seconds": elapsed,
-        "timing/elapsed_minutes": minutes,
-        "timing/steps_per_second": steps_per_sec,
-    })
+    # ── Save ──────────────────────────────────────────────────────────────
+    save_name_path = os.path.join(args.model_dir, run_name)
+    model.save(save_name_path)
+    env.save(save_name_path + "_vecnormalize.pkl")
+    print(f"[train_ppo] Final model saved to {save_name_path}")
 
-    run.finish()
-
-    if not args.no_save:
-        os.makedirs("models", exist_ok=True)
-        save_path = os.path.join("models", save_name)
-        model.save(save_path)
-        env.save(save_path + "_vecnormalize.pkl")
-        print(f"Model saved to {save_path}.zip")
-    else:
-        print("Skipping model save (--no_save).")
+    if wandb_run is not None:
+        import wandb
+        wandb.log({
+            "timing/elapsed_seconds": elapsed,
+            "timing/elapsed_minutes": minutes,
+            "timing/steps_per_second": steps_per_sec,
+        })
+        artifact = wandb.Artifact(run_name, type="model")
+        artifact.add_file(save_name_path + ".zip")
+        artifact.add_file(save_name_path + "_vecnormalize.pkl")
+        wandb_run.log_artifact(artifact)
+        wandb_run.finish()
 
 
 if __name__ == "__main__":
