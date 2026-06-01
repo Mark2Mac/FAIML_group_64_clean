@@ -83,13 +83,14 @@ class Policy(torch.nn.Module):
 
 
 class Agent(object):
-    def __init__(self, policy, device='cpu', lr=1e-3, gae_lambda=0.95):
+    def __init__(self, policy, device='cpu', lr=1e-3, gae_lambda=0.95, entropy_coef=0.0):
         self.train_device = device
         self.policy = policy.to(self.train_device)
         self.optimizer = torch.optim.Adam(policy.parameters(), lr=lr)
 
         self.gamma = 0.99
         self.gae_lambda = gae_lambda
+        self.entropy_coef = entropy_coef
         
         self.states = []
         self.next_states = []
@@ -117,7 +118,7 @@ class Agent(object):
             #
 
             # Get state values from the critic
-            _, values = self.policy(states)
+            dist, values = self.policy(states)
             _, next_values = self.policy(next_states)
             values = values.squeeze(-1)
             next_values = next_values.squeeze(-1)
@@ -149,7 +150,8 @@ class Agent(object):
             actor_loss = -torch.mean(advantages.detach() * action_log_probs)
             critic_loss = F.mse_loss(values, targets.detach())
 
-            loss = actor_loss + critic_loss
+            entropy = dist.entropy().sum(dim=-1).mean()
+            loss = actor_loss + critic_loss - self.entropy_coef * entropy
 
             # check:
                 # value mean, std
@@ -172,6 +174,7 @@ class Agent(object):
                 "sigma_mean": sigma.mean().item(),
                 "sigma_min": sigma.min().item(),
                 "sigma_max": sigma.max().item(),
+                "entropy": entropy.item(),
             }
                 
             

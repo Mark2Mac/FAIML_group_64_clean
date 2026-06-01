@@ -22,11 +22,22 @@ def main():
     parser.add_argument("--episodes", type=int, default=50000, help="Number of training episodes")
     parser.add_argument("--runs", type=int, default=3, help="Number of independent runs")
     parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate for both actor and critic")
+
     parser.add_argument("--wandb", action="store_true", help="Enable Weights & Biases logging")
     parser.add_argument("--project", type=str, default="hopper-faiml", help="W&B project name")
+
     parser.add_argument("--gae-lambda", type=float, default=0.95, help="GAE lambda")
     parser.add_argument("--sigma-floor", type=float, default=0.1, help="Minimum policy std added after softplus")
+
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
+
+    parser.add_argument("--entropy-coef", type=float, default=0.0, help="Entropy coefficient")
+
+    parser.add_argument("--lr-scheduler", action="store_true", help="Enable ReduceLROnPlateau LR scheduler")
+    parser.add_argument("--lr-factor", type=float, default=0.5, help="LR reduction factor")
+    parser.add_argument("--lr-patience", type=int, default=2000, help="Episodes without improvement before LR reduction")
+    parser.add_argument("--lr-threshold", type=float, default=50.0, help="Minimum avg100 improvement to avoid LR reduction")
+    parser.add_argument("--min-lr", type=float, default=1e-5, help="Minimum learning rate")
 
     args = parser.parse_args()
 
@@ -38,6 +49,14 @@ def main():
     print(f"\n{'='*40}")
     print(f" ACTOR-CRITIC TRAINING")
     print(f" Episodes: {NUM_EPISODES} | Runs: {NUM_RUNS} | Learning Rate: {args.lr}")
+
+    print(
+        f" LR Scheduler: {args.lr_scheduler} | "
+        f"Factor: {args.lr_factor} | "
+        f"Patience: {args.lr_patience} | "
+        f"Threshold: {args.lr_threshold} | "
+        f"Min LR: {args.min_lr}"
+    )
     print(f"{'='*40}")
 
     for run in range(1, NUM_RUNS + 1):
@@ -46,28 +65,52 @@ def main():
         if args.wandb:
             import wandb
             wandb.init(
+                entity="s355100-politecnico-di-torino",
                 project=args.project,
                 group="Actor-Critic",
-                name=f"AC_run_{run}_lr_{args.lr}",
+                name=f"AC_run_{run}_lr_{args.lr}_entropy_{args.entropy_coef}",
                 config={
                     "algorithm": "Actor-Critic",
                     "learning_rate": args.lr,
                     "episodes": NUM_EPISODES,
                     "run_id": run,
-                    "seed": 42 + run,
+
+                    "seed": args.seed + run,
+
                     "gae_lambda": args.gae_lambda,
                     "sigma_floor": args.sigma_floor,
+
+                    "entropy_coef": args.entropy_coef,
+
+                    "lr_scheduler": args.lr_scheduler,
+                    "lr_factor": args.lr_factor,
+                    "lr_patience": args.lr_patience,
+                    "lr_threshold": args.lr_threshold,
+                    "min_lr": args.min_lr,
                 },
                 reinit=True
             )
 
         seed = args.seed + run
         set_seed(seed)
-        wandb.config.update({"seed": seed})
+        if args.wandb: 
+            wandb.config.update({"seed": seed})
 
         env = gym.make('Hopper-v4')
         policy = Policy(env.observation_space.shape[0], env.action_space.shape[0], sigma_floor=args.sigma_floor)
-        agent = Agent(policy, lr=args.lr, gae_lambda=args.gae_lambda)
+        agent = Agent(policy, lr=args.lr, gae_lambda=args.gae_lambda, entropy_coef=args.entropy_coef)
+        
+        scheduler = None
+        if args.lr_scheduler:
+            scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+                agent.optimizer,
+                mode="max",
+                factor=args.lr_factor,
+                patience=args.lr_patience,
+                threshold=args.lr_threshold,
+                threshold_mode="abs",
+                min_lr=args.min_lr
+            )
 
         rewards_log = []
         lengths_log = []
@@ -113,6 +156,11 @@ def main():
 
             avg100 = np.mean(rewards_log[-100:])
 
+            if scheduler is not None:
+                scheduler.step(avg100)
+            current_lr = agent.optimizer.param_groups[0]['lr']
+
+
             if episode >= 100 and avg100 > best_avg_reward:
                 best_avg_reward = avg100
                 best_model_path = f"part1/models/policy_actor_critic_run_{run}_best.pth"
@@ -142,11 +190,17 @@ def main():
                     "sigma_mean": diagnostics["sigma_mean"],
                     "sigma_min": diagnostics["sigma_min"],
                     "sigma_max": diagnostics["sigma_max"],
+
+                    "current_lr": current_lr,
+                    "entropy": diagnostics["entropy"],
                 })
 
             if episode % 100 == 0:
-                print(f"Actor-Critic | Run {run} | Episode {episode:4d} | "
-                      f"Reward: {episode_reward:8.2f} | Avg100: {avg100:8.2f} | Best: {best_avg_reward:8.2f}")
+                print(
+                    f"Actor-Critic | Run {run} | Episode {episode:4d} | "
+                    f"Reward: {episode_reward:8.2f} | Avg100: {avg100:8.2f} | Best: {best_avg_reward:8.2f} | "
+                    f"LR: {current_lr:.2e}"
+                )
 
         elapsed = time.time() - start_time
         print(f"Training time (actor-critic, run={run}): {elapsed/60:.1f} min")
