@@ -50,3 +50,4 @@ secrets/
 *.fls
 *.blg
 *.bbl
+part1/hopper_videos/hopper_video_maker.py
