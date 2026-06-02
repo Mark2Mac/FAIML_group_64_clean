@@ -33,9 +33,12 @@ def main():
 
     parser.add_argument("--entropy-coef", type=float, default=0.0, help="Entropy coefficient")
 
-    parser.add_argument("--lr-scheduler", action="store_true", help="Enable linear LR decay scheduler")
-    parser.add_argument("--lr-decay-start", type=int, default=10000, help="Episode at which LR starts decaying")
-    parser.add_argument("--min-lr", type=float, default=1e-5, help="Minimum learning rate at end of training")
+    parser.add_argument("--lr-scheduler", action="store_true", help="Enable triggered LR decay")
+    parser.add_argument("--lr-trigger-avg-reward", type=float, default=1000.0)
+    parser.add_argument("--lr-trigger-avg-length", type=float, default=500.0)
+    parser.add_argument("--lr-trigger-best-reward", type=float, default=1500.0)
+    parser.add_argument("--lr-trigger-episode", type=int, default=45000)
+    parser.add_argument("--min-lr", type=float, default=1e-5)
 
     args = parser.parse_args()
 
@@ -49,10 +52,14 @@ def main():
     print(f" Episodes: {NUM_EPISODES} | Runs: {NUM_RUNS} | Learning Rate: {args.lr}")
 
     print(
-        f" LR Scheduler: {args.lr_scheduler} | "
-        f"Decay Start: {args.lr_decay_start} | "
+    f" LR Scheduler: {args.lr_scheduler} | "
+        f"Trigger avg_reward_100: {args.lr_trigger_avg_reward} | "
+        f"Trigger avg_length_100: {args.lr_trigger_avg_length} | "
+        f"Trigger best_avg_reward: {args.lr_trigger_best_reward} | "
+        f"Trigger episode: {args.lr_trigger_episode} | "
         f"Min LR: {args.min_lr}"
     )
+
     print(f"{'='*40}")
 
     for run in range(1, NUM_RUNS + 1):
@@ -79,7 +86,10 @@ def main():
                     "entropy_coef": args.entropy_coef,
 
                     "lr_scheduler": args.lr_scheduler,
-                    "lr_decay_start": args.lr_decay_start,
+                    "lr_trigger_avg_reward": args.lr_trigger_avg_reward,
+                    "lr_trigger_avg_length": args.lr_trigger_avg_length,
+                    "lr_trigger_best_reward": args.lr_trigger_best_reward,
+                    "lr_trigger_episode": args.lr_trigger_episode,
                     "min_lr": args.min_lr,
                 },
                 reinit=True
@@ -95,22 +105,9 @@ def main():
         policy = Policy(env.observation_space.shape[0], env.action_space.shape[0], sigma_floor=args.sigma_floor)
         agent = Agent(policy, lr=args.lr, gae_lambda=args.gae_lambda, entropy_coef=args.entropy_coef)
         
-        scheduler = None
-        if args.lr_scheduler:
-            min_lr_ratio = args.min_lr / args.lr  # ratio at the end of training
-            decay_start = args.lr_decay_start
-            decay_episodes = max(NUM_EPISODES - decay_start, 1)
-
-            def lr_lambda(episode):
-                if episode < decay_start:
-                    return 1.0  # constant LR
-                # linear decay from 1.0 down to min_lr_ratio
-                progress = (episode - decay_start) / decay_episodes
-                return max(1.0 - progress * (1.0 - min_lr_ratio), min_lr_ratio)
-
-            scheduler = torch.optim.lr_scheduler.LambdaLR(
-                agent.optimizer, lr_lambda=lr_lambda
-            )
+        lr_decay_started = False
+        lr_decay_start_episode = None
+        initial_lr = args.lr
 
         rewards_log = []
         lengths_log = []
@@ -154,17 +151,49 @@ def main():
             # [NEW]
             diagnostics_log.append(diagnostics)
 
-            avg100 = np.mean(rewards_log[-100:])
+            avg_reward_100 = np.mean(rewards_log[-100:])
+            avg_length_100 = np.mean(lengths_log[-100:])
+            reward_std_100 = np.std(rewards_log[-100:])
 
-            if scheduler is not None:
-                scheduler.step()
-            current_lr = agent.optimizer.param_groups[0]['lr']
-
-
-            if episode >= 100 and avg100 > best_avg_reward:
-                best_avg_reward = avg100
+            if episode >= 100 and avg_reward_100 > best_avg_reward:
+                best_avg_reward = avg_reward_100
                 best_model_path = f"part1/models/policy_actor_critic_run_{run}_best.pth"
                 torch.save(agent.policy.state_dict(), best_model_path)
+
+
+            if args.lr_scheduler:
+                trigger_by_reward_and_length = (
+                    avg_reward_100 >= args.lr_trigger_avg_reward and
+                    avg_length_100 >= args.lr_trigger_avg_length
+                )
+
+                trigger_by_best_reward = best_avg_reward >= args.lr_trigger_best_reward
+                trigger_by_episode = episode >= args.lr_trigger_episode
+
+                if (not lr_decay_started) and (
+                    trigger_by_reward_and_length or trigger_by_best_reward or trigger_by_episode
+                ):
+                    lr_decay_started = True
+                    lr_decay_start_episode = episode
+                    print(
+                        f"[LR DECAY STARTED] Episode {episode} | "
+                        f"AvgReward100: {avg_reward_100:.2f} | "
+                        f"AvgLength100: {avg_length_100:.2f} | "
+                        f"Best: {best_avg_reward:.2f}"
+                    )
+
+                if lr_decay_started:
+                    progress = (episode - lr_decay_start_episode) / max(NUM_EPISODES - lr_decay_start_episode, 1)
+                    progress = min(max(progress, 0.0), 1.0)
+
+                    current_lr = initial_lr - progress * (initial_lr - args.min_lr)
+
+                    for param_group in agent.optimizer.param_groups:
+                        param_group["lr"] = current_lr
+                else:
+                    current_lr = initial_lr
+            else:
+                current_lr = agent.optimizer.param_groups[0]["lr"]
 
             if args.wandb:
                 wandb.log({
@@ -173,7 +202,7 @@ def main():
                     "length": step_count,
                     "actor_loss": actor_loss,
                     "critic_loss": critic_loss,
-                    "avg_reward_100": avg100,
+                    "avg_reward_100": avg_reward_100,
                     "best_avg_reward": best_avg_reward,
 
                     # [NEW] additional actor critic diagnostics
@@ -193,13 +222,19 @@ def main():
 
                     "current_lr": current_lr,
                     "entropy": diagnostics["entropy"],
+
+                    "avg_length_100": avg_length_100,
+                    "reward_std_100": reward_std_100,
+                    "lr_decay_started": int(lr_decay_started),
                 })
 
             if episode % 100 == 0:
                 print(
                     f"Actor-Critic | Run {run} | Episode {episode:4d} | "
-                    f"Reward: {episode_reward:8.2f} | Avg100: {avg100:8.2f} | Best: {best_avg_reward:8.2f} | "
-                    f"LR: {current_lr:.2e}"
+                    f"Reward: {episode_reward:8.2f} | AvgReward100: {avg_reward_100:8.2f} | "
+                    f"Len100: {avg_length_100:7.2f} | StdReward100: {reward_std_100:7.2f} | "
+                    f"BestReward: {best_avg_reward:8.2f} | LR: {current_lr:.2e} | "
+                    f"Decay: {lr_decay_started}"
                 )
 
         elapsed = time.time() - start_time
