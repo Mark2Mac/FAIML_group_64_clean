@@ -1,1 +1,67 @@
 \section{Methodology}
+\subsection{Part 1: Hopper Continuous Control}
+
+Idea:
+\begin{itemize}
+    \item Cite all methods used: REINFORCE with and without baseline + AC + GAE
+    \item Briefly explain all methods added: GAE, normalised advantages, sigma floor, LR decay
+    \item Should I use some references here for GAE, reinforce and actor critic?
+\end{itemize}
+
+Part 1 focused on learning a locomotion policy for the Hopper environment using policy-gradient methods. Several approaches were explored, including REINFORCE, REINFORCE with baseline, and Actor-Critic architectures \cite{sutton2018}.
+
+Since we're considering a continuous enviroment, all models policy outputs both the mean and standard deviations of a Gaussian action distribution, $a_t \sim \mathcal N(\mu_\theta(s_t), \sigma_\theta(s_t))$, where both parameters are learned by the policy network. During training, actions are sampled from the distribution to encourage exploration, while during evaluation the policy becomes deterministic by using mean actions $\mu_\theta(s_t)$.
+
+To improve the quality of the policy updates, Generalized Advantage Estimation (GAE) was implemented \cite{schulman2015}. Therefore, advantages are computed as
+\[
+\hat A_t^{GAE} = \sum_{l=0}^{\infty} (\gamma\lambda)^l \delta_{t+l}
+\]
+Where $\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$ is the temporal-difference error.
+In this way, GAE provides a compromise between using a low-variance TD(0) estimate and a high variance Monte Carlo approach that considers the episode full return.
+
+Subsequently, advantages were normalized before policy updates in order to stabilize gradients, stabilize critic's estimates and reduce training instability. A minimum standard deviation (sigma floor) was enforced to prevent premature collapse of exploration and continue promoting exploration even in later stages. Additionally, a triggered learning-rate decay mechanism was introduced during later stages of training with the aim of stabilizing training by reducing update magnitude after the policy had discovered effective locomotion behaviors.
+
+All these modifications were designed to improve training stability, maintain sufficient exploration, and allow longer training horizons without facing policy collapses.
+
+
+\subsection{Part 2: PandaPush, SAC, PPO and Domain Randomization}
+
+Idea:
+\begin{itemize}
+    \item Not sure about anything I'm saying, check pls + it's pretty AI
+\end{itemize}
+
+Part 2 investigates sim-to-real transfer using the PandaPush-v3 robotic manipulation environment. The task consists of controlling a Franka Panda robotic arm to push a cube toward a desired target position.
+The observation space contains the robot state, cube state, and target position information. Actions are continuous Cartesian end-effector displacements,
+\[
+a_t=[dx,dy,dz].
+\]
+The dense reward function is defined as
+\[
+r_t = -\left\| p_{obj}(t)-p_{goal} \right\|_2,
+\]
+where $p_{obj}$ and $p_{goal}$ denote the cube and target positions respectively. A task is considered successful when the final cube-target distance is below 5 cm.
+
+Two reinforcement-learning algorithms were evaluated.
+Proximal Policy Optimization (PPO) is an on-policy actor-critic algorithm that limits policy updates through a clipped objective,
+\[
+L^{CLIP} = \mathbb E \Big[ \min( \rho_t \hat A_t, \text{clip}(\rho_t,1-\epsilon,1+\epsilon)\hat A_t ) \Big].
+\]
+The clipping mechanism improves stability but reduces sample efficiency because collected trajectories cannot be reused extensively.
+
+Soft Actor-Critic (SAC) is an off-policy actor-critic method that maximizes both reward and policy entropy,
+\[
+J = \mathbb E[R] + \alpha H(\pi).
+\]
+SAC combines a replay buffer, twin critics to reduce value overestimation, and automatic entropy tuning. These characteristics generally provide better exploration and sample efficiency than PPO, especially in continuous-control robotic tasks.
+To improve transfer across different dynamics, Domain Randomization (DR) was applied by varying the cube mass during training.
+
+Three configurations were evaluated:
+\begin{itemize}
+    \item No DR: fixed source mass $m=1$ kg.
+    \item Uniform Domain Randomization (UDR): $m \sim U(0.5,8.0)$ with a new mass sampled at every episode.
+    \item Automatic Domain Randomization (ADR): an adaptive curriculum that expands or contracts the sampling range according to agent performance.
+\end{itemize}
+
+The target environment uses a cube mass of 5 kg. However, the randomization range was chosen to be broad enough to include both source and target conditions without being narrowly centered around the target mass, avoiding information leakage from the evaluation environment.
+

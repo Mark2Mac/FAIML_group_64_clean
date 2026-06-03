@@ -34,3 +34,88 @@ All the policies were tested on $50$ test episodes.
 % mediana molto più alta e compatta rispetto a REINFORCE. Le "scatole" di REINFORCE 
 % saranno molto lunghe (o schiacciate verso il basso) a causa delle run fallite (es. Run 2 e 3), 
 % confermando la superiorità dei metodi Actor-Critic in ambienti continui.
+
+
+
+\subsection{Part 1 Results: Hopper Continuous Control}
+
+Idea:
+\begin{itemize}
+    \item Results using 120k steps or 50k? (I'll use the 12k steps because it's the one I know the results best)
+    \item I've pasted a few graphs but do we won't use all of them, select whatever you want
+    \item 4 pahses:
+    \begin{itemize}
+        \item 0--40k --> barely learns anything, locomotion still not discovered
+        \item 40k-60k --> discovers locomotion
+        \item 60-80k --> still performance improvement
+        \item 80-120k --> never stabilises
+    \end{itemize}
+    \item Overview of other interesting metrics through all the training phase
+\end{itemize}
+
+We ran the Actor-Critic for over 100,000 training episodes and it successfully learned a locomotion policy for the Hopper environment. As we can see from the graph X (there should be the graph number), training can be divided into four distinct phases.
+
+During the first phase (0--40k episodes), the agent learned balancing and standing behaviors, but not forward locomotion yet. Therefore, average rewards remained relatively low and episode lengths were short.
+
+Between 40k and 60k episodes, a steep increase in both reward and episode length occurred, suggesting that forward locomotion was discovered.
+
+Then, from 60k to 80k episodes, performance continued to improve as the policy refined its locomotion strategy.
+
+Finally, during the 80k--120k interval, training entered a high-performance plateau without managing to converge in a stable way. Average rewards exceeded 2000 and several individual episodes achieved rewards over 3000. Nevertheless, a noticeable amount of variability still persisted in the later training stages, alternating both extremely high and low performing episodes proving that the learned behavior was able to achieve high score but not consistently.
+
+During the whole training phase, both the learned policy standard deviation and entropy decreased throughout training (metto grafico anche di questi? Troppo? Io metterei uno dei due), showing a smooth transition from an exploratory to a more deterministic policy as it gained confidence.
+
+The critic loss, however, present several large spikes, particularly during periods of rapid policy improvement. This is due to the fact that the critic struggles to adapt its value estimates to the rapidly evolving policy. On the contrary, the actor loss remains stably bounded and centered around zero thanks to advantage normalization.
+
+Although convergence and behavior reproducibility was not fully achieved, the agent consistently maintained high reward levels throughout the final stages of training.
+
+
+
+
+\subsection{Part 2 Results: PandaPush Sim-to-Sim Transfer}
+
+Idea:
+\begin{itemize}
+    \item Show results of each algorithm --> SAC + UDR > SAC + ADR > SAC > PPO
+    \item Reality gap --> vanilla SAC vs upper bound ; SAC + UDR vs upper bound
+    \item Mass-sensitivity analysis --> vanilla SAC sucks and SAC + UDR achieves better results for general purpose
+    \item Again, not sure about the correctness and pretty AI
+\end{itemize}
+
+(Marco ha messo una tabella in report insights pt2 ma è gigantesca, non so se ci stia + non immediata da leggere)
+
+\begin{table}[h]
+\centering
+\caption{Target-environment performance comparison.}
+\begin{tabular}{lc}
+\hline
+Method & Target Return \\
+\hline
+PPO & $\sim -3.0$ \\
+SAC (none) & -0.633 \\
+SAC + ADR & -0.556 \\
+SAC + UDR & -0.509 \\
+Oracle & -0.445 \\
+\hline
+\end{tabular}
+\end{table}
+
+The results clearly show that SAC outperforms PPO. Even after an extensive hyperparameter tuning, PPO consistently plateaued around a return of -3.0 and failed to solve the task. On the other hand, SAC successfully learned effective pushing policies and transferred well to the target environment.
+
+Uniform Domain Randomization (UDR) achieved the best performance, outperforming both vanilla SAC and Automatic Domain Randomization (ADR). It achieved a target return of -0.509 compared to -0.556 for ADR and -0.633 for vanilla SAC. The policy obtained training directly on the target environment (oracle) achieved the best overall result (-0.445) but is not a valid sim-to-real solution because it has access to target dynamics during training, it only represents the upper bound.
+
+The reality gap can be measured relative to the oracle.
+\begin{itemize}
+    \item The gap between vanilla SAC and the oracle is $(-0.445)-(-0.633)=0.188$.
+    \item The gap between SAC + UDR and the oracle is $(-0.445)-(-0.509)=0.064$.
+\end{itemize}
+
+Therefore, the fraction of the gap removed by UDR is
+\[
+\frac{0.188-0.064}{0.188}=0.6596,
+\]
+corresponding to approximately 66\%.
+
+This result indicates that UDR eliminates about two-thirds of the performance loss caused by the source-to-target mass shift.
+
+Finally a mass-sensitivity analysis was conducted to further highlight the robustness gained thanks to domain randomization techniques. When evaluated at increasingly heavier masses, vanilla SAC deteriorates from -0.554 at 1 kg to -0.869 at 15 kg. In contrast, UDR only decreases from -0.478 to -0.592 over the same range. This demonstrates that UDR learns a policy that is robust across a wide range of dynamics rather than specialized to a single mass value.
