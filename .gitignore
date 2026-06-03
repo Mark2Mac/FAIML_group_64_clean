@@ -7,6 +7,7 @@ env/
 *.pth
 part1/models_backup/
 part1/render_best_model.py
+part1/models
 
 # Cache di Python
 __pycache__/
