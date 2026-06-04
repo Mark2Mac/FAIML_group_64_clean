@@ -1,34 +1,191 @@
 \section{Methodology}
 \subsection{Part 1: Hopper Continuous Control}
 
-Idea:
+Guidelines:
 \begin{itemize}
-    \item Cite all methods used: REINFORCE with and without baseline + AC + GAE
-    \item Briefly explain all methods added: GAE, normalised advantages, sigma floor, LR decay
-    \item Should I use some references here for GAE, reinforce and actor critic?
+    \item Implementation of the different algorithms, including relevant loss functions and design choices
+    \begin{itemize}
+        \item Pt1: ok
+        \item Pt2: \ldots
+    \end{itemize}
+
+    \item Explain which advanced RL argument has been used, the selection of hyperparameters, ecc.
+    \begin{itemize}
+        \item Pt1: ok
+        \item Pt2: \ldots
+    \end{itemize}
+
+    \item Domain Randomization: Detail the implemented UDR and ADR strategies, including the chosen mass ranges, adaptation rules, and relevant hyperparameters.
+    \begin{itemize}
+        \item Pt1: ok
+        \item Pt2: \ldots
+    \end{itemize}
+
+    \item Anything else that is related to the specific project ideas and implementations Evaluation Metrics: Clearly define the metrics and protocol used to assess performance for each evaluated configuration.
+    \begin{itemize}
+        \item Pt1: ok
+        \item Pt2: \ldots
+    \end{itemize}
+
+    \item Note: you can choose whether to divide this section and the next one by part 1 and part 2 (following project specific parts) or to keep them in the same text without specific subsections. Both options are valid.
+    \begin{itemize}
+        \item Pt1: ok
+        \item Pt2: \ldots
+    \end{itemize}
 \end{itemize}
 
-Part 1 focused on learning a locomotion policy for the Hopper environment using policy-gradient methods. Several approaches were explored, including REINFORCE, REINFORCE with baseline, and Actor-Critic architectures \cite{sutton2018}.
+\textbf{I wrote this part and it's still flagged as AI???}
 
-Since we're considering a continuous enviroment, all models policy outputs both the mean and standard deviations of a Gaussian action distribution, $a_t \sim \mathcal N(\mu_\theta(s_t), \sigma_\theta(s_t))$, where both parameters are learned by the policy network. During training, actions are sampled from the distribution to encourage exploration, while during evaluation the policy becomes deterministic by using mean actions $\mu_\theta(s_t)$.
+Part 1 focused on learning a locomotion policy for the Hopper environment using policy-gradient methods.
+Several approaches were explored, including REINFORCE, REINFORCE with baseline, and Actor-Critic architectures. (Sutton \& Barto, 2018)
 
-To improve the quality of the policy updates, Generalized Advantage Estimation (GAE) was implemented \cite{schulman2015}. Therefore, advantages are computed as
+REINFORCE updates the policy using the full episodes return, while REINFORCE with baseline stabilises the
+training phase reducing the gradient variance by subtracting a fixed (or learned) baseline from the return.
+The final implementation uses an Actor-Critic architecture, where the actor learns the policy while the critic estimates
+the value function. The actor updates the policy based on the estimated advantages, modifying the probability of actions
+based on how they turned out to be with respect to the critic’s expectations:
+
+\[
+L_{\text{actor}} = -\mathbb{E}\left[\hat A_t \log \pi_\theta(a_t|s_t)\right].
+\]
+
+In parallel, the critic minimizes the squared difference between the predicted state value and the temporal-difference target:
+
+\[
+L_{\text{critic}} = \mathbb{E}\left[\left(r_t+\gamma V_\phi(s_{t+1})-V_\phi(s_t)\right)^2\right].
+\]
+
+Since we're considering a continuous enviroment, all models policy outputs both the mean and standard
+deviations of a Gaussian action distribution:
+
+\[
+a_t \sim \mathcal N(\mu_\theta(s_t), \sigma_\theta(s_t)),
+\]
+
+where both parameters are learned by the policy network. During training, actions are sampled from the
+distribution to encourage exploration, while during evaluation the policy becomes deterministic by
+using mean actions $\mu_\theta(s_t)$.
+
+To improve the quality of the policy updates, Generalized Advantage Estimation (GAE)
+was implemented. (Schulman et al., 2015) Therefore, advantages are computed as:
+
 \[
 \hat A_t^{GAE} = \sum_{l=0}^{\infty} (\gamma\lambda)^l \delta_{t+l}
 \]
-Where $\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$ is the temporal-difference error.
-In this way, GAE provides a compromise between using a low-variance TD(0) estimate and a high variance Monte Carlo approach that considers the episode full return.
 
-Subsequently, advantages were normalized before policy updates in order to stabilize gradients, stabilize critic's estimates and reduce training instability. A minimum standard deviation (sigma floor) was enforced to prevent premature collapse of exploration and continue promoting exploration even in later stages. Additionally, a triggered learning-rate decay mechanism was introduced during later stages of training with the aim of stabilizing training by reducing update magnitude after the policy had discovered effective locomotion behaviors.
+Where:
 
-All these modifications were designed to improve training stability, maintain sufficient exploration, and allow longer training horizons without facing policy collapses.
+\[
+\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)
+\]
+
+is the temporal-difference error.
+
+In this way, GAE provides a compromise between using a low-variance TD(0)
+estimate and a high variance Monte Carlo approach that considers the episode full return.
+
+The final Actor-Critic configuration employed a discount factor $\gamma = 0.99$,
+a GAE parameter $\lambda = 0.95$, a learned action variance, and a minimum variance threshold (sigma floor = 0.1).
+Training was performed for more than 100,000 episodes in order to allow the policy sufficient time to discover and
+refine locomotion behaviours. These hyperparameters were selected empirically to balance exploration,
+learning stability, and long-term performance.
+
+
+\textbf{do we place a table with all hyperparameters?}
+
+\begin{table}[h]
+\centering
+\caption{Actor-Critic Hyperparameters}
+\begin{tabular}{ll}
+\hline
+Hyperparameter & Value \\
+\hline
+Discount Factor ($\gamma$) & 0.99 \\
+GAE Lambda ($\lambda$) & 0.95 \\
+Learning Rate & $3 \times 10^{-4}$ \\
+Minimum Learning Rate After Decay & $1 \times 10^{-5}$ \\
+Sigma Floor & 0.1 \\
+Initial Learned Sigma & 0.5 (through Softplus + Sigma Floor) \\
+Entropy Coefficient & 0.0 \\
+Training Episodes & 120,000 \\
+Learning Rate Decay Trigger & $\sim$45,000 episodes (performance-triggered) \\
+Hidden Layers & 64, 64 \\
+Activation Function & Tanh \\
+Optimizer & Adam \\
+\hline
+\end{tabular}
+\end{table}
+
+
+Subsequently, advantages were normalized before policy updates in order to stabilize gradients,
+stabilize critic's estimates and reduce training instability. A minimum standard deviation (sigma floor)
+was enforced to prevent premature collapse of exploration and continue promoting exploration even in later stages.
+Additionally, a triggered learning-rate decay mechanism was introduced during later stages of training with the aim
+of stabilizing training by reducing update magnitude after the policy had discovered effective locomotion behaviors.
+
+
+\textbf{are we considering the model that has this LR decay or Francesco's one}
+More specifically, the decay was activated only once one of the following trigger conditions was satisfied, which
+caused the learning rate to linearly reduce from $3 \times 10^{-4}$ to $10^{-5}$ until the end of training.
+
+\begin{table}[h]
+\centering
+\caption{Learning Rate Decay Triggers}
+\begin{tabular}{ll}
+\hline
+Trigger condition & Threshold \\
+\hline
+Rolling average reward and rolling average episode length & avg\_reward\_100 $\geq$ 1000 and avg\_length\_100 $\geq$ 500 \\
+Best rolling average reward & best\_avg\_reward $\geq$ 1500 \\
+Episode fallback trigger & episode $\geq$ 45,000 \\
+Initial learning rate & $3 \times 10^{-4}$ \\
+Minimum learning rate & $10^{-5}$ \\
+\hline
+\end{tabular}
+\end{table}
+
+The goal was to reduce update magnitude once the Hopper had likely discovered jumping, as this behaviour leads to
+higher rewards but while being much more unstable. The thresholds were chosen empirically: high average reward together
+with long episode length meant sustained hopping was disovered, and also best\_avg\_reward $\geq$ 1500 indicated clear
+high-performance runs. The 45,000-episode condition acted as a fallback that would have forced the LR decay initialisation,
+again this threshold value was set based on previous runs, which showed that hopping usually emerged around 40k--45k episodes.
+
+All these modifications were designed to improve training stability, maintain sufficient exploration, and allow longer
+training horizons without facing policy collapses.
+
+Performance was evaluated using numeruous training diagnostics, such as episodic reward, rolling average reward over the
+last 100 episodes, episode length, policy entropy, learned action standard deviation, actor loss and critic loss.
+During the training phase all the mentioned evaluation metrics were monitored to supervise the learning progress,
+exploration behaviour, value-function stability, and policy convergence.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 \subsection{Part 2: PandaPush, SAC, PPO and Domain Randomization}
 
 Idea:
 \begin{itemize}
-    \item Not sure about anything I'm saying, check pls + it's pretty AI
+    \item Not sure about anything I'm saying, check pls + it's mainly AI generated
 \end{itemize}
 
 Part 2 investigates sim-to-real transfer using the PandaPush-v3 robotic manipulation environment. The task consists of controlling a Franka Panda robotic arm to push a cube toward a desired target position.

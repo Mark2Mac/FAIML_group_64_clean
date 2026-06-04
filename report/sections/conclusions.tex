@@ -1,9 +1,30 @@
-\section{Conclusions}
 \section{Conclusion}
-\textbf{still work in progress}
+
+Guidelines:
 \begin{itemize}
-    \item Part 1: custom Actor-Critic successfully learns Hopper locomotion but remains unstable.
-    \item Part 2: SAC clearly outperforms PPO on PandaPush.
-    \item UDR is the final selected method.
-    \item UDR improves robustness and reduces the sim-to-real gap by about 66\%.
+    \item best-performing algorithm: ok
+    \item effectiveness of domain randomization: ok
+    \item main limitation or possible future improvement: ok
 \end{itemize}
+
+This project investigated reinforcement learning for continuous control and sim-to-real transfer through
+two complementary tasks.
+
+In Part 1, the REINFORCE (with and without baseline) and a custom Actor-Critic framework was developed and all
+were applied to the Hopper environment. The proposed enhancements, including Generalized Advantage Estimation (GAE),
+advantage normalization, a learned policy standard deviation, a sigma floor, and triggered learning-rate decay, allowed
+to achieve an average rward of over 2000 and single episodes well over 3000, proving that they achieved successful learning
+of locomotion behaviours.
+Nevertheless, significant reward variability and the lack of behavioral convergence persisted throughout training,
+indicating that the agent was not able to always replicate consistent hopping.
+
+In Part 2, the focus shifted to sim-to-real transfer in the PandaPush environment. The experimental results demonstrated
+a clear advantage of Soft Actor-Critic (SAC) over Proximal Policy Optimization (PPO), which failed to solve the task within
+the available training budget. Among the transfer strategies deployed to fill the reality gap,
+Uniform Domain Randomization (UDR) achieved the best overall performance, outperforming both vanilla SAC and
+unexpectedly Automatic Domain Randomization (ADR) too.
+
+The final selected approach is therefore SAC combined with UDR. By training on a broad distribution of cube masses,
+UDR produced a substantially sturdier policy and reduced the sim-to-real gap by approximately 66\% relative to
+the non-randomized baseline. These results confirm the effectiveness of domain randomization as a practical strategy
+for improving transfer performance in robotic reinforcement-learning tasks.

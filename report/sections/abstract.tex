@@ -1,11 +1,26 @@
 \begin{abstract}
-\textbf{Last part}
+Guidelines:
+\begin{itemize}
+    \item State the problem: ok
+    \item Mention implemented algorithms and strategies: ok
+    \item Summarize key quantitative results: ok
+    \item Summarize conclusions: ok
+\end{itemize}
 
-This document is a model and instructions for \LaTeX.
-This and the IEEEtran.cls file define the components of your paper [title, text, heads, etc.]. *CRITICAL: Do Not Use Symbols, Special Characters, Footnotes, 
-or Math in Paper Title or Abstract.
+This project investigates reinforcement learning for continuous robotic control and sim-to-real transfer in
+a sim-to-sim setting. The work is divided into two complementary parts. In the first part, the focus in on policy-gradient
+methods implementation in the Hopper continuous-control environment, including REINFORCE, REINFORCE with baseline,
+and Actor-Critic architectures. Several improvements were introduced, including Generalized Advantage Estimation (GAE),
+advantage normalization, a learned exploration variance with a sigma floor, and a triggered learning-rate decay mechanism.
+The resulting Actor-Critic agent successfully learned forward locomotion, achieving average rewards above 2000 and individual
+episodes exceeding 3000, however the resulting agent could not consistently replicate the learned hopping behavior,
+as significant reward variability remained throughout training.
+
+In the second part, sim-to-sim transfer methods were deployed on the PandaPush environment, using Proximal Policy Optimization (PPO),
+Soft Actor-Critic (SAC), Uniform Domain Randomization (UDR), and Automatic Domain Randomization (ADR).
+Experimental results showed that SAC outperformed PPO, while UDR achieved the best transfer performance among the
+evaluated sim-to-real strategies. Compared to vanilla SAC, UDR reduced the sim-to-real gap by approximately 66\%, generating
+a sturdier model able to adapt to a borader range of weights, resulting in an overall better model for generalization
+across different environment dynamics. The results highlight the effectiveness of modern actor-critic methods for continuous
+control and show that domain randomization can substantially improve transfer robustness under dynamics uncertainty.
 \end{abstract}
-
-\begin{IEEEkeywords}
-component, formatting, style, styling, insert
-\end{IEEEkeywords}

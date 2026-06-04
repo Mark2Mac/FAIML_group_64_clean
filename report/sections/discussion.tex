@@ -1,0 +1,56 @@
+\section{Discussion}
+
+Guidelines:
+\begin{itemize}
+    \item Part 1:
+    \begin{itemize}
+        \item Result Analysis: Go beyond the numbers and explain why the results happened: ok
+        \item Methodological Critique: Reflect on the limitations of the approaches: ok
+        \item e.g., algorithm stability, hyperparameter sensitivity, UDR/ADR limitations, and the simplified sim-to-sim setting.
+        \begin{itemize}
+            \item algorithm stability: ok
+            \item Hyperparameter sensitivity: meh, not really but I think it's fine, the guidelines cite the hyperparameter sensitivity for the methodological critique, but we criticize more than enough the model, so there might be no need to add hyperparameter sensitivity.
+        \end{itemize}
+    \end{itemize}
+
+    \item Part 2:
+    \begin{itemize}
+        \item AI generated
+    \end{itemize}
+\end{itemize}
+
+The results obtained in the first part demonstrate that the proposed Actor-Critic framework successfully learned a
+locomotion policy for the Hopper environment. Indeed, the Hopper's discovered balancing, the forward locomotion behavior,
+the average rewards exceeding 2000 together with the occasional episodes reaching scores above 3000, all prove that the agent
+discovered effective hopping. Nevertheless, training did not fully converge to a stable hopping policy: significant reward
+variance remained throughout the final stages of training, proving that the learned policy was still too exploratory and
+stochastic, causing it to be unable to reproduce its best behaviors consistently.
+
+This result represents a substantial improvement compared to earlier Actor-Critic implementations tested during development.
+Preliminary versions frequently converged to a degenerate local optimum in which the Hopper remained stationary for extended
+periods before eventually collapsing. Although such behaviour produced relatively stable trajectories, it prevented the
+discovery of effective locomotion and resulted in poor returns. The introduction of GAE, advantage normalization, a learned
+exploration variance with a sigma floor and a triggered learning-rate decay mechanism significantly improved exploration
+and enabled the policy to free itself from the local optimum, eventually discovering hopping.
+
+This behavior instability seems to be proved by the critic-loss spikes, which, however should not necessarily be interpreted
+as training failure. These spikes are not necessarily indicative of unstable training as reinforcement-learning targets
+continuously change together with the current policy, therefore when the actor discovers substantially better trajectories,
+previously learned value estimates become obsolete and inaccurate, generating large temporal-difference errors and
+consequently large critic-loss spikes. This reasoning proves that the critic loss irregularity is caused by its own outdated
+estimates and it trying to keep up with the new updated policy, demonstrating that an unsteady critic loss is quite inevitable
+as it is caused by the Reinforcement Learning intrinsic dynamicity.
+
+This interpretation is supported by the fact that critic spikes often coincide with newly discovered high-reward behaviors,
+such as the discovery of hopping.
+
+In contrast, actor updates remained remarkably stable throughout training, as advantage normalization successfully bounded
+policy updates and prevented gradient explosions despite the highly non-stationary learning process.
+
+Despite these improvements, the final policy still exhibits substantial variability and has not fully converged. Future work
+could investigate additional stabilization techniques like TRPO or PPO which exploits trust region and clipped policy
+updates (Schulman et al., 2017).
+
+Furthermore, more advanced actor-critic methods for continuous control, such as DDPG and TD3, could be explored,
+exploiting double-critic architectures and delayed policy updates, to potentially reduce value-estimation errors
+and improve training stability (Fujimoto et al., 2018).

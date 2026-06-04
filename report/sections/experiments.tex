@@ -1,7 +1,7 @@
 \section{Experiments \& Results}
 
 \subsection{Experimental Setup}
-
+\textbf{I have no idea who wrote this}
 The training on the Hopper-v4 environment lasted for 5000 episodes, this number was empirically found to be suffiecient for high-variance algorithms like REINFORCE in order to converge ensuring an exhaustive comparison.
 
 All models in this environment were trained using the Adam optimizer wiht a fixed learning rate of $10^{-3}$ and a discount factor $\gamma = 0.99$. 
@@ -37,37 +37,88 @@ All the policies were tested on $50$ test episodes.
 
 
 
+
+
+
+
+
+
+\textbf{This is my part}
 \subsection{Part 1 Results: Hopper Continuous Control}
 
-Idea:
+Guidelines:
+\begin{itemize}
+    \item MANDATORY The Results Table: Present the mandatory results table clearly, including all required training$\rightarrow$test configurations.
+    \begin{itemize}
+        \item \textbf{MISSING}
+    \end{itemize}
+
+    \item Quantitative Breakdown: Describe the numbers objectively.
+    \begin{itemize}
+        \item Ok
+    \end{itemize}
+
+    \item Point out where the policies performed well
+    \begin{itemize}
+        \item Ok
+    \end{itemize}
+
+    \item Point out where they failed
+    \begin{itemize}
+        \item Ok
+    \end{itemize}
+
+    \item Tables and figures can (and should) be inserted to make the results clear to the reader.
+    \begin{itemize}
+        \item \textbf{MISSING}
+    \end{itemize}
+
+    \item Example 1 from guidelines: reinforce, reinforce + baseline and actor critic could be compared using a plot with mean and std over time to show the specific features/behaviour of the algorithms --> Comparison across algorithms.
+    \begin{itemize}
+        \item \textbf{MISSING: We don't have something like this}
+    \end{itemize}
+\end{itemize}
+
+Note:
 \begin{itemize}
     \item Results using 120k steps or 50k? (I'll use the 12k steps because it's the one I know the results best)
     \item I've pasted a few graphs but do we won't use all of them, select whatever you want
-    \item 4 pahses:
-    \begin{itemize}
-        \item 0--40k --> barely learns anything, locomotion still not discovered
-        \item 40k-60k --> discovers locomotion
-        \item 60-80k --> still performance improvement
-        \item 80-120k --> never stabilises
-    \end{itemize}
-    \item Overview of other interesting metrics through all the training phase
 \end{itemize}
 
-We ran the Actor-Critic for over 100,000 training episodes and it successfully learned a locomotion policy for the Hopper environment. As we can see from the graph X (there should be the graph number), training can be divided into four distinct phases.
+We ran the Actor-Critic for over 100,000 training episodes and it successfully learned a locomotion policy for the Hopper environment.
+As we can see from the graph X (there should be the graph number), training can be divided into four distinct phases.
 
-During the first phase (0--40k episodes), the agent learned balancing and standing behaviors, but not forward locomotion yet. Therefore, average rewards remained relatively low and episode lengths were short.
+During the first phase (0--40k episodes), the agent learned balancing and standing behaviors, but not forward locomotion yet.
+Therefore, average rewards remained relatively low and episode lengths were short.
 
 Between 40k and 60k episodes, a steep increase in both reward and episode length occurred, suggesting that forward locomotion was discovered.
 
 Then, from 60k to 80k episodes, performance continued to improve as the policy refined its locomotion strategy.
 
-Finally, during the 80k--120k interval, training entered a high-performance plateau without managing to converge in a stable way. Average rewards exceeded 2000 and several individual episodes achieved rewards over 3000. Nevertheless, a noticeable amount of variability still persisted in the later training stages, alternating both extremely high and low performing episodes proving that the learned behavior was able to achieve high score but not consistently.
+Finally, during the 80k--120k interval, training entered a high-performance plateau without managing to converge in a stable way.
+Average rewards exceeded 2000 and several individual episodes achieved rewards over 3000. Nevertheless, a noticeable amount of variability still persisted
+in the later training stages, alternating both extremely high and low performing episodes proving that the learned behavior was able to achieve high score
+but not consistently.
 
-During the whole training phase, both the learned policy standard deviation and entropy decreased throughout training (metto grafico anche di questi? Troppo? Io metterei uno dei due), showing a smooth transition from an exploratory to a more deterministic policy as it gained confidence.
+During the whole training phase, both the learned policy standard deviation and entropy decreased throughout training
+(metto grafico anche di questi? Troppo? Io metterei uno dei due), showing a smooth transition from an exploratory to a more deterministic policy as it gained confidence.
 
-The critic loss, however, present several large spikes, particularly during periods of rapid policy improvement. This is due to the fact that the critic struggles to adapt its value estimates to the rapidly evolving policy. On the contrary, the actor loss remains stably bounded and centered around zero thanks to advantage normalization.
+The critic loss, however, present several large spikes, particularly during periods of rapid policy improvement. This is due to the fact that the critic
+struggles to adapt its value estimates to the rapidly evolving policy. On the contrary, the actor loss remains stably bounded and centered around zero thanks
+to advantage normalization.
 
 Although convergence and behavior reproducibility was not fully achieved, the agent consistently maintained high reward levels throughout the final stages of training.
+
+
+
+
+
+
+
+
+
+
+
 
 
 

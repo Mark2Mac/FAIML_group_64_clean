@@ -1,4 +1,5 @@
 \section{Introduction}
+\textbf{I have no idea who wrote this part}
 Reinforcement Learning has recently shown remarkable success in solving continuous control tasks, enabling agents to acquire manipulation and locomotion skills.
 
 However, training these policies on real physical hardware is often unfeasible due to costs, mechanical wear and safety constraints.
@@ -11,22 +12,34 @@ The first part of this work focuses on the \texttt{Hopper-v4} locomotion task, a
 Finally, we design and implement a one-step Actor-Critic architecture to show how bootstrapping and temporal difference learning can reduce gradient variance. This improves learning stability and speeds up policy convergence.
 
 
-
-Idea:
-\begin{itemize}
-    \item RL in robotics --> prove that it's trending and we're doing something currently relevant
-    \item Explain why RL in robotics is hard and interesting
-    \item Explain reality gap
-    \item Explain this project division into part 1 and 2
-\end{itemize}
+\textbf{This is my part}
 \section{Introduction}
-Reinforcement Learning (RL) is becoming one of the most popular and successful approaches for solving continuous control problems, especially in robotics \cite{tera2026,kober2013}.
-Indeed, this setting introduces several challenges such as delayed rewards, exploration--exploitation trade-offs, high-dimensional continuous action spaces and potentially unstable training dynamics. In addition to this, robotic control represents a challenging application of RL also due to the fact that small changes in the policy can lead to very different behaviors and delayed feedback can make credit assignment complex.
 
-Another major challenge this paper tackles is sim-to-real transfer. Policies are commonly trained in simulation, where data collection is cheap and safe, and then applied to environments whose dynamics differ from those seen during training. This discrepancy represents the reality gap and it can significantly degrade performance \cite{tobin2017}.
-In the second half of the project, the reality gap is represented through a variation in the mass of a manipulated object: from a source environment with a 1 kg cube to a target environment with a 5 kg cube.
+Guidelines:
+\begin{itemize}
+    \item Define the core task of reinforcement learning for robotic control and the sim-to-real transfer problem: ok
+    \item Explicitly cite and discuss the provided baseline references on RL, RL in robotics, sim-to-real transfer, PPO/SAC, and domain randomization: \textbf{PPO and SAC still missing}
+\end{itemize}
+
+Reinforcement Learning (RL) is becoming one of the most popular and successful approaches for solving continuous control
+problems, especially in robotics. (Tera et al., 2026) OR/AND (Kober et al., 2013)
+Indeed, this setting introduces several challenges such as delayed rewards, exploration--exploitation trade-offs,
+high-dimensional continuous action spaces and potentially unstable training dynamics. In addition to this, robotic control
+represents a challenging application of RL also due to the fact that small changes in the policy can lead to very different
+behaviors and delayed feedback can make credit assignment complex.
+
+Another major challenge this paper tackles is sim-to-real transfer. Policies are commonly trained in simulation, where data
+collection is cheap and safe, and then applied to environments whose dynamics differ from those seen during training.
+This discrepancy represents the reality gap and it can significantly degrade performance. (Tobin et al., 2017)
+In the second half of the project, the reality gap is represented through a variation in the mass of a manipulated object:
+from a source environment with a 1 kg cube to a target environment with a 5 kg cube.
 The objective is to learn an effective control policy which is also robust to the reality gap.
 
-The project is divided into two complementary parts. In the first part, we implement and analyze policy-gradient methods on the Hopper continuous-control environment, observing learning dynamics, exploration behavior, critic stability, and overall training performance. In the second part, we investigate sim-to-real transfer on the PandaPush environment using Proximal Policy Optimization (PPO) and Soft Actor-Critic (SAC), together with Uniform Domain Randomization (UDR) and Automatic Domain Randomization (ADR) strategies to address the reality gap. The goal is to evaluate how algorithmic choices and domain-randomization techniques affect robustness and transfer performance across different object masses.
-
+The project is divided into two complementary parts. In the first part, we implement and analyze policy-gradient methods on
+the Hopper continuous-control environment, observing learning dynamics, exploration behavior, critic stability, and overall
+training performance (Brockman et al., 2016; Todorov et al., 2012).
+In the second part, we investigate sim-to-real transfer on the PandaPush environment using Proximal Policy Optimization (PPO)
+and Soft Actor-Critic (SAC), together with Uniform Domain Randomization (UDR) and Automatic Domain Randomization (ADR)
+strategies to address the reality gap. The goal is to evaluate how algorithmic choices and domain-randomization techniques
+affect robustness and transfer performance across different object masses. (Gallouédec et al., 2024)
 
