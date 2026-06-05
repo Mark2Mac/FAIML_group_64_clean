@@ -128,7 +128,7 @@ of stabilizing training by reducing update magnitude after the policy had discov
 More specifically, the decay was activated only once one of the following trigger conditions was satisfied, which
 caused the learning rate to linearly reduce from $3 \times 10^{-4}$ to $10^{-5}$ until the end of training.
 
-\begin{table}[h]
+\begin{table}[ht]
 \centering
 \caption{Learning Rate Decay Triggers}
 \begin{tabular}{ll}
@@ -189,7 +189,7 @@ Idea:
 \end{itemize}
 
 Part 2 investigates sim-to-real transfer using the PandaPush-v3 robotic manipulation environment. The task consists of controlling a Franka Panda robotic arm to push a cube toward a desired target position.
-The observation space contains the robot state, cube state, and target position information. Actions are continuous Cartesian end-effector displacements,
+The observation space contains the robot state, cube state, and target position information. Actions are continuous Cartesian end-effector displacements, \textbf{what does it mean?}
 \[
 a_t=[dx,dy,dz].
 \]
@@ -204,7 +204,11 @@ Proximal Policy Optimization (PPO) is an on-policy actor-critic algorithm that l
 \[
 L^{CLIP} = \mathbb E \Big[ \min( \rho_t \hat A_t, \text{clip}(\rho_t,1-\epsilon,1+\epsilon)\hat A_t ) \Big].
 \]
-The clipping mechanism improves stability but reduces sample efficiency because collected trajectories cannot be reused extensively.
+
+\[
+\rho_t = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}
+\]
+The clipping mechanism improves stability but reduces sample efficiency because collected trajectories cannot be reused extensively. \textbf{formula rho da mettere meglio}
 
 Soft Actor-Critic (SAC) is an off-policy actor-critic method that maximizes both reward and policy entropy,
 \[
@@ -216,7 +220,7 @@ To improve transfer across different dynamics, Domain Randomization (DR) was app
 Three configurations were evaluated:
 \begin{itemize}
     \item No DR: fixed source mass $m=1$ kg.
-    \item Uniform Domain Randomization (UDR): $m \sim U(0.5,8.0)$ with a new mass sampled at every episode.
+    \item Uniform Domain Randomization (UDR): $m \sim U(0.5,8.0)$ with a new mass sampled at every episode. \textbf{Marco should take a better look at the range to write here}
     \item Automatic Domain Randomization (ADR): an adaptive curriculum that expands or contracts the sampling range according to agent performance.
 \end{itemize}
 

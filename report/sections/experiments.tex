@@ -73,7 +73,7 @@ Guidelines:
         \item \textbf{MISSING}
     \end{itemize}
 
-    \item Example 1 from guidelines: reinforce, reinforce + baseline and actor critic could be compared using a plot with mean and std over time to show the specific features/behaviour of the algorithms --> Comparison across algorithms.
+    \item Example 1 from guidelines: reinforce, reinforce + baseline and actor critic could be compared using a plot with mean and std over time to show the specific features/behaviour of the algorithms $\Rightarrow$ Comparison across algorithms.
     \begin{itemize}
         \item \textbf{MISSING: We don't have something like this}
     \end{itemize}
@@ -127,13 +127,13 @@ Although convergence and behavior reproducibility was not fully achieved, the ag
 
 Idea:
 \begin{itemize}
-    \item Show results of each algorithm --> SAC + UDR > SAC + ADR > SAC > PPO
-    \item Reality gap --> vanilla SAC vs upper bound ; SAC + UDR vs upper bound
-    \item Mass-sensitivity analysis --> vanilla SAC sucks and SAC + UDR achieves better results for general purpose
+    \item Show results of each algorithm $\Rightarrow$ SAC + UDR $\rightarrow$ SAC + ADR $\rightarrow$ SAC $\rightarrow$ PPO
+    \item Reality gap $\Rightarrow$ vanilla SAC vs upper bound ; SAC + UDR vs upper bound
+    \item Mass-sensitivity analysis $\Rightarrow$ vanilla SAC sucks and SAC + UDR achieves better results for general purpose
     \item Again, not sure about the correctness and pretty AI
 \end{itemize}
 
-(Marco ha messo una tabella in report insights pt2 ma è gigantesca, non so se ci stia + non immediata da leggere)
+\textbf{(Marco ha messo una tabella in report insights pt2 ma è gigantesca, non so se ci stia + non immediata da leggere), inserire valore corretto per PPO e aggiungere success rate}
 
 \begin{table}[h]
 \centering
@@ -151,7 +151,7 @@ Oracle & -0.445 \\
 \end{tabular}
 \end{table}
 
-The results clearly show that SAC outperforms PPO. Even after an extensive hyperparameter tuning, PPO consistently plateaued around a return of -3.0 and failed to solve the task. On the other hand, SAC successfully learned effective pushing policies and transferred well to the target environment.
+The results clearly show that SAC outperforms PPO. Even after an extensive hyperparameter tuning, PPO consistently plateaued around a return of -3.0 and failed to solve the task consistently (success rate:$\sim 20\%$). On the other hand, SAC successfully learned effective pushing policies and transferred well to the target environment.
 
 Uniform Domain Randomization (UDR) achieved the best performance, outperforming both vanilla SAC and Automatic Domain Randomization (ADR). It achieved a target return of -0.509 compared to -0.556 for ADR and -0.633 for vanilla SAC. The policy obtained training directly on the target environment (oracle) achieved the best overall result (-0.445) but is not a valid sim-to-real solution because it has access to target dynamics during training, it only represents the upper bound.
 
