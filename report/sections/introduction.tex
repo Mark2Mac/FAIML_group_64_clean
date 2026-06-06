@@ -1,19 +1,4 @@
 \section{Introduction}
-\textbf{I have no idea who wrote this part}
-Reinforcement Learning has recently shown remarkable success in solving continuous control tasks, enabling agents to acquire manipulation and locomotion skills.
-
-However, training these policies on real physical hardware is often unfeasible due to costs, mechanical wear and safety constraints.
-As a result of this, the standard procedure relies on training these agents in simulated environments before deploying them into the real world.
-
-A major challenge in this procedure is the \textit{reality gap}, the discrepancy between the simulated training environment and the actual world. This is often caused by unmodeled dynamics or sensor noise leading to a degradation of performance when moving from the simulation to the real world. 
-
-The first part of this work focuses on the \texttt{Hopper-v4} locomotion task, an environment where a one-legged robot must learn to jump forward without falling. Within this setting, we implement the vanilla REINFORCE algorithm from scratch and evaluate the critical role of baseline subtraction by testing both a zero baseline and a constant baseline. 
-
-Finally, we design and implement a one-step Actor-Critic architecture to show how bootstrapping and temporal difference learning can reduce gradient variance. This improves learning stability and speeds up policy convergence.
-
-
-\textbf{This is my part}
-\section{Introduction}
 
 Guidelines:
 \begin{itemize}
@@ -38,7 +23,9 @@ The objective is to learn an effective control policy which is also robust to th
 
 The project is divided into two complementary parts. In the first part, we implement and analyze policy-gradient methods on
 the Hopper continuous-control environment, observing learning dynamics, exploration behavior, critic stability, and overall
-training performance (Brockman et al., 2016; Todorov et al., 2012).
+training performance (Brockman et al., 2016; Todorov et al., 2012). Specifically, we implement REINFORCE (Williams, 1992) with and without a constant baseline, and a one-step Actor-Critic architecture
+augmented with Generalized Advantage Estimation, evaluating the impact of variance reduction techniques on learning stability and convergence.
+
 In the second part, we investigate sim-to-real transfer on the PandaPush environment using Proximal Policy Optimization (PPO)
 and Soft Actor-Critic (SAC), together with Uniform Domain Randomization (UDR) and Automatic Domain Randomization (ADR)
 strategies to address the reality gap. The goal is to evaluate how algorithmic choices and domain-randomization techniques
