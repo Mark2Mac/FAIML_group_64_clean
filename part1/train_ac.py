@@ -40,12 +40,19 @@ def main():
     parser.add_argument("--lr-trigger-episode", type=int, default=45000)
     parser.add_argument("--min-lr", type=float, default=1e-5)
 
+    # [NEW]
+    parser.add_argument("--output-dir", type=str, default="part1/models", help="Directory where models/results are saved")
+    parser.add_argument("--run-tag", type=str, default="actor_critic", help="Tag used in saved filenames")
+
     args = parser.parse_args()
 
     NUM_RUNS = args.runs
     NUM_EPISODES = args.episodes
 
-    os.makedirs('part1/models', exist_ok=True)
+    # os.makedirs('part1/models', exist_ok=True)
+    os.makedirs(args.output_dir, exist_ok=True)
+    print(f"Output directory: {args.output_dir}")
+    print(f"Run tag: {args.run_tag}")
 
     print(f"\n{'='*40}")
     print(f" ACTOR-CRITIC TRAINING")
@@ -157,7 +164,8 @@ def main():
 
             if episode >= 100 and avg_reward_100 > best_avg_reward:
                 best_avg_reward = avg_reward_100
-                best_model_path = f"part1/models/policy_actor_critic_run_{run}_best.pth"
+                # best_model_path = f"part1/models/policy_actor_critic_run_{run}_best.pth"
+                best_model_path = f"{args.output_dir}/policy_{args.run_tag}_run_{run}_best.pth"
                 torch.save(agent.policy.state_dict(), best_model_path)
 
 
@@ -240,18 +248,28 @@ def main():
         elapsed = time.time() - start_time
         print(f"Training time (actor-critic, run={run}): {elapsed/60:.1f} min")
 
-        model_path = f"part1/models/policy_actor_critic_run_{run}.pth"
-        torch.save(agent.policy.state_dict(), model_path)
+        # model_path = f"part1/models/policy_actor_critic_run_{run}.pth"
+        # torch.save(agent.policy.state_dict(), model_path)
 
-        np.save(f"part1/models/rewards_actor_critic_run_{run}.npy", np.array(rewards_log))
-        np.save(f"part1/models/lengths_actor_critic_run_{run}.npy", np.array(lengths_log))
-        np.save(f"part1/models/actor_losses_actor_critic_run_{run}.npy", np.array(actor_losses_log))
-        np.save(f"part1/models/critic_losses_actor_critic_run_{run}.npy", np.array(critic_losses_log))
+        # np.save(f"part1/models/rewards_actor_critic_run_{run}.npy", np.array(rewards_log))
+        # np.save(f"part1/models/lengths_actor_critic_run_{run}.npy", np.array(lengths_log))
+        # np.save(f"part1/models/actor_losses_actor_critic_run_{run}.npy", np.array(actor_losses_log))
+        # np.save(f"part1/models/critic_losses_actor_critic_run_{run}.npy", np.array(critic_losses_log))
         
         # [NEW]
-        np.save(f"part1/models/diagnostics_actor_critic_run_{run}.npy", np.array(diagnostics_log, dtype=object))
+        # np.save(f"part1/models/diagnostics_actor_critic_run_{run}.npy", np.array(diagnostics_log, dtype=object))
 
-        np.save(f"part1/models/time_actor_critic_run_{run}.npy", np.array([elapsed]))
+        # np.save(f"part1/models/time_actor_critic_run_{run}.npy", np.array([elapsed]))
+
+        model_path = f"{args.output_dir}/policy_{args.run_tag}_run_{run}.pth"
+        torch.save(agent.policy.state_dict(), model_path)
+
+        np.save(f"{args.output_dir}/rewards_{args.run_tag}_run_{run}.npy", np.array(rewards_log))
+        np.save(f"{args.output_dir}/lengths_{args.run_tag}_run_{run}.npy", np.array(lengths_log))
+        np.save(f"{args.output_dir}/actor_losses_{args.run_tag}_run_{run}.npy", np.array(actor_losses_log))
+        np.save(f"{args.output_dir}/critic_losses_{args.run_tag}_run_{run}.npy", np.array(critic_losses_log))
+        np.save(f"{args.output_dir}/diagnostics_{args.run_tag}_run_{run}.npy", np.array(diagnostics_log, dtype=object))
+        np.save(f"{args.output_dir}/time_{args.run_tag}_run_{run}.npy", np.array([elapsed]))
         env.close()
 
         if args.wandb:
