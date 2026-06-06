@@ -46,7 +46,11 @@ L = -\sum_t \left(G_t - b\right) \log \pi_\theta(a_t | s_t)
 \]
 
 
-where $G_t = \sum_{k=0}^{T-t} \gamma^k r_{t+k}$ is the discounted return from timestep $t$ and $b$ is a baseline. This formulation keeps the gradient estimator unbiased regardless of the choice of $b$, since $\mathbb{E}[\nabla_\theta \log \pi_\theta \cdot b] = 0$ for any constant, but is subject to high variance due to the stochastic nature of full-episode returns. In the first variant $b = 0$, yielding vanilla REINFORCE. In the second, a constant baseline $b = 20$ is subtracted from the return, reducing gradient variance by centering the return signal without affecting the gradient direction. Both variants share the same policy network and training configuration: a two-layer MLP with hidden sizes [64, 64] and Tanh activations, with orthogonal weight initialization, trained using the Adam optimizer with learning rate $3 \times 10^{-4}$ and discount factor $\gamma = 0.99$.
+
+where $G_t = \sum_{k=0}^{T-t} \gamma^k r_{t+k}$ is the discounted return from timestep $t$ and $b$ is a baseline. This formulation keeps the gradient estimator unbiased regardless of the choice of $b$, since $\mathbb{E}[\nabla_\theta \log \pi_\theta \cdot b] = 0$ for any constant, but is subject to high variance due to the stochastic nature of full-episode returns. In the first variant $b = 0$, we have vanilla REINFORCE. In the second, a constant baseline $b = 20$ is subtracted from the return, reducing gradient variance by centering the return signal without affecting the gradient direction. 
+
+Both variants share the same policy network and training configuration: a two-layer MLP with hidden sizes [64, 64] and Tanh activations, with orthogonal weight initialization, trained using the Adam optimizer with learning rate $3 \times 10^{-4}$ and discount factor $\gamma = 0.99$.
+
 
 
 The final implementation uses an Actor-Critic architecture, where the actor learns the policy while the critic estimates
