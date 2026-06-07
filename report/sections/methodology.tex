@@ -98,12 +98,10 @@ estimate and a high variance Monte Carlo approach that considers the episode ful
 
 The final Actor-Critic configuration employed a discount factor $\gamma = 0.99$,
 a GAE parameter $\lambda = 0.95$, a learned action variance, and a minimum variance threshold (sigma floor = 0.1).
-Training was performed for more than 100,000 episodes in order to allow the policy sufficient time to discover and
+Training was performed for more than 70,000 episodes in order to allow the policy sufficient time to discover and
 refine locomotion behaviours. These hyperparameters were selected empirically to balance exploration,
 learning stability, and long-term performance.
 
-
-\textbf{do we place a table with all hyperparameters?}
 
 \begin{table}[h]
 \centering
@@ -136,7 +134,6 @@ Additionally, a triggered learning-rate decay mechanism was introduced during la
 of stabilizing training by reducing update magnitude after the policy had discovered effective locomotion behaviors.
 
 
-\textbf{are we considering the model that has this LR decay or Francesco's one}
 More specifically, the decay was activated only once one of the following trigger conditions was satisfied, which
 caused the learning rate to linearly reduce from $3 \times 10^{-4}$ to $10^{-5}$ until the end of training.
 

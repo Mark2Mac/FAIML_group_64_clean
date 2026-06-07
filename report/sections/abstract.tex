@@ -1,20 +1,12 @@
 \begin{abstract}
-Guidelines:
-\begin{itemize}
-    \item State the problem: ok
-    \item Mention implemented algorithms and strategies: ok
-    \item Summarize key quantitative results: ok
-    \item Summarize conclusions: ok
-\end{itemize}
-
 This project investigates reinforcement learning for continuous robotic control and sim-to-real transfer in
-a sim-to-sim setting. The work is divided into two complementary parts. In the first part, the focus in on policy-gradient
+a sim-to-sim setting. The work is divided into two complementary parts. In the first part, the focus is on policy-gradient
 methods implementation in the Hopper continuous-control environment, including REINFORCE, REINFORCE with baseline,
 and Actor-Critic architectures. Several improvements were introduced, including Generalized Advantage Estimation (GAE),
 advantage normalization, a learned exploration variance with a sigma floor, and a triggered learning-rate decay mechanism.
-The resulting Actor-Critic agent successfully learned forward locomotion, achieving average rewards above 2000 and individual
-episodes exceeding 3000, however the resulting agent could not consistently replicate the learned hopping behavior,
-as significant reward variability remained throughout training.
+The resulting REINFORCE agent with and without fixed baseline both performed similarly with an average reward of WAITING FOR MORE DATA. 
+The resulting Actor-Critic agent successfully learned forward locomotion, achieving average rewards around 2000 and individual
+episodes exceeding 3000, however a significant reward variability remained throughout training.
 
 In the second part, sim-to-sim transfer methods were deployed on the PandaPush environment, using Proximal Policy Optimization (PPO),
 Soft Actor-Critic (SAC), Uniform Domain Randomization (UDR), and Automatic Domain Randomization (ADR).

@@ -1,49 +1,5 @@
 \section{Experiments \& Results}
 
-\subsection{Experimental Setup}
-\textbf{I have no idea who wrote this}
-The training on the Hopper-v4 environment lasted for 5000 episodes, this number was empirically found to be suffiecient for high-variance algorithms like REINFORCE in order to converge ensuring an exhaustive comparison.
-
-All models in this environment were trained using the Adam optimizer wiht a fixed learning rate of $10^{-3}$ and a discount factor $\gamma = 0.99$. 
-
-Furthermore, to account the stochasticity of policy gradients methos, for each configuration we used $3$ independent run using different random inizializator seeds.
-
-All the policies were tested on $50$ test episodes.
-
-\subsection{Policy Gradient Analysis: REINFORCE}
-% 1. Analisi b=0.0: Spiega l'enorme varianza tra i seed. Ad esempio, menziona che 
-%    nella Run 1 avete superato i 300 punti, mentre la Run 2 è crollata a ~9. 
-%    Questo dimostra la sensibilità intrinseca del Monte Carlo gradient estimator.
-% 2. Analisi b=20.0 (Il collasso): Usa i vostri numeri! Spiega che un baseline fisso 
-%    di 20.0 ha distrutto la Run 3 (ritorno crollato a ~1.11). Poiché nelle prime fasi 
-%    l'agente non sa saltare e fa meno di 20 punti, il vantaggio (G_t - 20) è risultato 
-%    sistematicamente negativo, penalizzando ingiustamente ogni azione intrapresa.
-
-\begin{figure}[htbp]
-\centerline{\includegraphics[width=0.48\textwidth]{imgs/fig1.png}}
-\end{figure}
-
-\subsection{Variance Reduction: Actor-Critic vs. REINFORCE}
-% 1. Fai riferimento alla Figura \ref{fig:learning_curves} e commenta come 
-%    l'introduzione dell'Actor-Critic cambi drasticamente la curva di apprendimento.
-% 2. Spiega teoricamente che il Critic V(s) sostituisce la stima Monte Carlo 
-%    (soggetta a varianza) con un aggiornamento "bootstrapped" step-by-step.
-%    Questo stabilizza l'addestramento, rendendo la curva visibilmente più pulita.
-
-% Fai notare visivamente tramite i boxplot che Actor-Critic garantisce una 
-% mediana molto più alta e compatta rispetto a REINFORCE. Le "scatole" di REINFORCE 
-% saranno molto lunghe (o schiacciate verso il basso) a causa delle run fallite (es. Run 2 e 3), 
-% confermando la superiorità dei metodi Actor-Critic in ambienti continui.
-
-
-
-
-
-
-
-
-
-\textbf{This is my part}
 \subsection{Part 1 Results: Hopper Continuous Control}
 
 Guidelines:
@@ -85,7 +41,7 @@ Note:
     \item I've pasted a few graphs but do we won't use all of them, select whatever you want
 \end{itemize}
 
-We ran the Actor-Critic for over 100,000 training episodes and it successfully learned a locomotion policy for the Hopper environment.
+We ran the Actor-Critic for 70,000 training episodes and it successfully learned a locomotion policy for the Hopper environment.
 As we can see from the graph X (there should be the graph number), training can be divided into four distinct phases.
 
 During the first phase (0--40k episodes), the agent learned balancing and standing behaviors, but not forward locomotion yet.
