@@ -19,21 +19,21 @@ def set_seed(seed):
 
 def main():
     parser = argparse.ArgumentParser(description="Train Actor-Critic on Hopper-v4")
-    parser.add_argument("--episodes", type=int, default=50000, help="Number of training episodes")
-    parser.add_argument("--runs", type=int, default=3, help="Number of independent runs")
+    parser.add_argument("--episodes", type=int, default=50000, help="Number of training episodes")                              # specify it when runing
+    parser.add_argument("--runs", type=int, default=3, help="Number of independent runs")                                       # specify it when runing
     parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate for both actor and critic")
 
-    parser.add_argument("--wandb", action="store_true", help="Enable Weights & Biases logging")
-    parser.add_argument("--project", type=str, default="hopper-faiml", help="W&B project name")
+    parser.add_argument("--wandb", action="store_true", help="Enable Weights & Biases logging")                                 # specify it when runing
+    parser.add_argument("--project", type=str, default="hopper-faiml", help="W&B project name")                                 # specify it when runing
 
     parser.add_argument("--gae-lambda", type=float, default=0.95, help="GAE lambda")
     parser.add_argument("--sigma-floor", type=float, default=0.1, help="Minimum policy std added after softplus")
 
-    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")                                 # specify it when runing
 
     parser.add_argument("--entropy-coef", type=float, default=0.0, help="Entropy coefficient")
 
-    parser.add_argument("--lr-scheduler", action="store_true", help="Enable triggered LR decay")
+    parser.add_argument("--lr-scheduler", action="store_true", help="Enable triggered LR decay")                                # specify it when runing
     parser.add_argument("--lr-trigger-avg-reward", type=float, default=1000.0)
     parser.add_argument("--lr-trigger-avg-length", type=float, default=500.0)
     parser.add_argument("--lr-trigger-best-reward", type=float, default=1500.0)
@@ -41,8 +41,8 @@ def main():
     parser.add_argument("--min-lr", type=float, default=1e-5)
 
     # [NEW]
-    parser.add_argument("--output-dir", type=str, default="part1/models", help="Directory where models/results are saved")
-    parser.add_argument("--run-tag", type=str, default="actor_critic", help="Tag used in saved filenames")
+    parser.add_argument("--output-dir", type=str, default="part1/models", help="Directory where models/results are saved")      # specify it when runing
+    parser.add_argument("--run-tag", type=str, default="actor_critic", help="Tag used in saved filenames")                      # specify it when runing
 
     args = parser.parse_args()
 
@@ -125,6 +125,7 @@ def main():
         diagnostics_log = []
         
         best_avg_reward = -float('inf')
+        best_episode_reward = -float('inf')
         start_time = time.time()
 
         for episode in range(NUM_EPISODES):
@@ -151,6 +152,7 @@ def main():
 
             actor_loss, critic_loss, diagnostics = agent.update_policy(actor_critic=True)
             rewards_log.append(episode_reward)
+            best_episode_reward = max(best_episode_reward, episode_reward)
             lengths_log.append(step_count)
             actor_losses_log.append(actor_loss)
             critic_losses_log.append(critic_loss)
@@ -207,6 +209,7 @@ def main():
                 wandb.log({
                     "episode": episode,
                     "reward": episode_reward,
+                    "best_episode_reward": best_episode_reward,
                     "length": step_count,
                     "actor_loss": actor_loss,
                     "critic_loss": critic_loss,
@@ -240,6 +243,7 @@ def main():
                 print(
                     f"Actor-Critic | Run {run} | Episode {episode:4d} | "
                     f"Reward: {episode_reward:8.2f} | AvgReward100: {avg_reward_100:8.2f} | "
+                    f"BestEpisode: {best_episode_reward:8.2f} | "
                     f"Len100: {avg_length_100:7.2f} | StdReward100: {reward_std_100:7.2f} | "
                     f"BestReward: {best_avg_reward:8.2f} | LR: {current_lr:.2e} | "
                     f"Decay: {lr_decay_started}"
