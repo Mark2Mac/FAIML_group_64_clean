@@ -16,6 +16,7 @@ def main():
     parser.add_argument("--project", type=str, default="hopper-ac-gae-sigmaFloor-entropy-weirdLR", help="W&B project name")
     parser.add_argument("--output-dir", type=str, default="part1/models")
     parser.add_argument("--run-tag", type=str, default="reinforce")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
     args = parser.parse_args()
 
     baselines = [0.0, 20.0]
@@ -45,12 +46,12 @@ def main():
                         "learning_rate": args.lr,
                         "episodes": NUM_EPISODES,
                         "run_id": run,
-                        "seed": 42 + run
+                        "seed": args.seed + run
                     },
                     reinit=True
                 )
 
-            seed = 42 + run
+            seed = args.seed + run
             torch.manual_seed(seed)
             np.random.seed(seed)
 
