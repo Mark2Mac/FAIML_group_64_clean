@@ -200,7 +200,7 @@ Soft Actor-Critic (SAC) is an off-policy actor-critic method that maximizes both
 J = \mathbb E[R] + \alpha H(\pi).
 \]
 SAC combines a replay buffer, twin critics to reduce value overestimation, and automatic entropy tuning. These characteristics generally provide better exploration and sample efficiency than PPO, especially in continuous-control robotic tasks.
-To improve transfer across different dynamics, Domain Randomization (DR) was applied by varying the cube mass during training.
+To improve transfer across different dynamics, Domain Randomization (DR) was applied by varying the cube mass during training. \textbf{SAC explaination should be expanded, also maybe add some equations for the loss functions and the automatic entropy tuning mechanism.}
 
 Three configurations were evaluated:
 \begin{itemize}
@@ -211,3 +211,9 @@ Three configurations were evaluated:
 
 The target environment uses a cube mass of 5 kg. However, the randomization range was chosen to be broad enough to include both source and target conditions without being narrowly centered around the target mass, avoiding information leakage from the evaluation environment.
 
+First step of this section was to train the PPO and SAC agents on the source environment with fixed mass, in order to evaluate their behavior and performance on this task.
+Both algorithms were implemented using the Stable Baselines3 library \cite{stable-baselines3}, with their hyperparameter configurations selected based on extensive bayesian optimization (taking advantage of \textit{Weigths \& Biases Sweeps \cite{wandb}}).
+The final hyperparameters were chosen based on best average reward and success rate across more than 30 training runs for each algorithm, with the best-performing configuration selected for the final evaluation phase.
+
+After training, both PPO and SAC were evaluated on the target environment and compared, aiming to choose the best-performig algorithm as the base on which to apply domain randomization.
+\textbf{Marco should finish the paragraph by explaining evaluation method and methodology for application on domain randomization}
