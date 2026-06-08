@@ -103,25 +103,27 @@ Idea:
     \item Again, not sure about the correctness and pretty AI
 \end{itemize}
 
-\textbf{(Marco ha messo una tabella in report insights pt2 ma è gigantesca, non so se ci stia + non immediata da leggere), inserire valore corretto per PPO e aggiungere success rate}
+\textbf{(Marco ha messo una tabella in report insights pt2 ma è gigantesca, inserirei separatamente le tabelle per i valori richiesti (Source-Source, Source-Target già fatta))}
+\textbf{Risultati PPO per source-source: return -3.485 +- 0.091 sr 20\% +- 0.1, target->target solo su sac}
 
 \begin{table}[h]
 \centering
-\caption{Target-environment performance comparison.}
-\begin{tabular}{lc}
+\begin{tabular}{lcc}
 \hline
-Method & Target Return \\
+Method & Target Return & Target Success Rate \\ 
 \hline
-PPO & $\sim -3.0$ \\
-SAC (none) & -0.633 \\
-SAC + ADR & -0.556 \\
-SAC + UDR & -0.509 \\
-Oracle & -0.445 \\
+PPO & $-3.496 \pm 0.051$ & $20\% \pm 0.1\%$ \\
+SAC (none) & $-0.633 \pm 0.152$ & $97.5\% \pm 0.3\%$ \\
+SAC + ADR & $-0.556 \pm 0.044$ & $99.2\%$ \\
+\textbf{SAC + UDR} & $\mathbf{-0.509 \pm 0.032}$ & $\mathbf{99.7\%}$ \\
+Oracle & $-0.445 \pm 0.019$ & $100\%$ \\
 \hline
 \end{tabular}
+\caption{Target-environment performance comparison.}
+\label{table:target_performance}
 \end{table}
 
-The results clearly show that SAC outperforms PPO. Even after an extensive hyperparameter tuning, PPO consistently plateaued around a return of -3.0 and failed to solve the task consistently (success rate:$\sim 20\%$). On the other hand, SAC successfully learned effective pushing policies and transferred well to the target environment.
+The results clearly show that SAC outperforms PPO, both on source and training environments \ref{table:target_performance}. Even after an extensive hyperparameter tuning, PPO consistently plateaued around a return of -3.0 and failed to solve the task consistently (success rate:$\sim 20\%$). On the other hand, SAC successfully learned effective pushing policies and transferred well to the target environment.
 
 Uniform Domain Randomization (UDR) achieved the best performance, outperforming both vanilla SAC and Automatic Domain Randomization (ADR). It achieved a target return of -0.509 compared to -0.556 for ADR and -0.633 for vanilla SAC. The policy obtained training directly on the target environment (oracle) achieved the best overall result (-0.445) but is not a valid sim-to-real solution because it has access to target dynamics during training, it only represents the upper bound.
 
