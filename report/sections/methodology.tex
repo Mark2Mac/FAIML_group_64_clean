@@ -191,11 +191,25 @@ The idea behind this algorithm is that excessively large policy updates result i
 The clipping mechanism improves stability but reduces sample efficiency because collected trajectories cannot be reused extensively.
 
 
-Soft Actor-Critic (SAC) is an off-policy algorithm that optimizes a stochastic policy by the maximization of the trade-off between expected return and entropy ($J = \mathbb{E}[R] + \alpha H(\pi)$), encouraging the exploration. 
-Its entropy tuning mechanism dynamically adjusts the temperature parameter $\alpha$ to maintain a target entropy level, this prevents early convergence of the agent.
+Soft Actor-Critic (SAC) is an off-policy actor-critic method that maximizes both reward and policy entropy,
+\[
+J = \mathbb E[R] + \alpha H(\pi).
+\]
+SAC combines a replay buffer, twin critics to reduce value overestimation, and automatic entropy tuning. These characteristics generally provide better exploration and sample efficiency than PPO, especially in continuous-control robotic tasks.
+To improve transfer across different dynamics, Domain Randomization (DR) was applied by varying the cube mass during training. \textbf{SAC explaination should be expanded, also maybe add some equations for the loss functions and the automatic entropy tuning mechanism.}
 
-In order to reduce the reality gap, two Domain Randomization strategies were implemented by updating the object mass during training:
+Three configurations were evaluated:
 \begin{itemize}
-    \item \textbf{Uniform Domain Randomization (UDR):} The mass is uniformly sampled at the beginning of each episode from a fixed range $m \sim U(0.5, 8.0)$ kg.
-    \item \textbf{Automatic Domain Randomization (ADR):} The mass is chosen from a dynamically updated sampling range. During training, the mass is sampled from the boundaries of the current range 50\% of the time, and uniformly from the interior the other 50\%. The range expands by a step size of 0.1 kg if the average return at a boundary exceeds 80\% of a rolling baseline, and contracts if it falls below 50\%, focusing the training on the limits of the agent's capabilities.
+    \item No DR: fixed source mass $m=1$ kg.
+    \item Uniform Domain Randomization (UDR): $m \sim U(0.5,8.0)$ with a new mass sampled at every episode. \textbf{Marco should take a better look at the range to write here}
+    \item Automatic Domain Randomization (ADR): an adaptive curriculum that expands or contracts the sampling range according to agent performance.
 \end{itemize}
+
+The target environment uses a cube mass of 5 kg. However, the randomization range was chosen to be broad enough to include both source and target conditions without being narrowly centered around the target mass, avoiding information leakage from the evaluation environment.
+
+First step of this section was to train the PPO and SAC agents on the source environment with fixed mass, in order to evaluate their behavior and performance on this task.
+Both algorithms were implemented using the Stable Baselines3 library \cite{stable-baselines3}, with their hyperparameter configurations selected based on extensive bayesian optimization (taking advantage of \textit{Weigths \& Biases Sweeps \cite{wandb}}).
+The final hyperparameters were chosen based on best average reward and success rate across more than 30 training runs for each algorithm, with the best-performing configuration selected for the final evaluation phase.
+
+After training, both PPO and SAC were evaluated on the target environment and compared, aiming to choose the best-performig algorithm as the base on which to apply domain randomization.
+\textbf{Marco should finish the paragraph by explaining evaluation method and methodology for application on domain randomization}
