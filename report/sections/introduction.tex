@@ -20,8 +20,8 @@ the Hopper continuous-control environment, observing learning dynamics, explorat
 training performance (Brockman et al., 2016; Todorov et al., 2012). Specifically, we implement REINFORCE (Williams, 1992) with and without a constant baseline, and a one-step Actor-Critic architecture
 augmented with Generalized Advantage Estimation, evaluating the impact of variance reduction techniques on learning stability and convergence.
 
-In the second part, we investigate sim-to-real transfer on the PandaPush environment, first evaluating an on-policy approach with Proximal Policy Optimization (PPO) \textbf{add ppo paper ref in bib}
-against Soft Actor-Critic (SAC) \textbf{add sac paper ref in bib}, an off-policy method, together with Uniform Domain Randomization (UDR) and Automatic Domain Randomization (ADR) \textbf{probably cite UDR and ADR papers}
+In the second part, we investigate sim-to-real transfer on the PandaPush environment, first evaluating an on-policy approach with Proximal Policy Optimization (PPO) \cite{SchulmanPPO2017}
+against Soft Actor-Critic (SAC) \cite{SAC2018}, an off-policy method, together with Uniform Domain Randomization (UDR) and Automatic Domain Randomization (ADR) \cite{rubikADR2019}
 strategies to address the reality gap. The goal is to evaluate how algorithmic choices and domain-randomization techniques
 affect robustness and transfer performance across different object masses. (Gallouédec et al., 2024)
 
