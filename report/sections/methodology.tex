@@ -1,17 +1,6 @@
 \section{Methodology}
 \subsection{Part 1: Hopper Continuous Control}
 
-Guidelines:
-\begin{itemize}
-    \item Implementation of the different algorithms, including relevant loss functions and design choices
-    \item Explain which advanced RL argument has been used, the selection of hyperparameters, ecc.
-    \item Domain Randomization: Detail the implemented UDR and ADR strategies, including the chosen mass ranges, adaptation rules, and relevant hyperparameters.
-    \item Anything else that is related to the specific project ideas and implementations Evaluation Metrics: Clearly define the metrics and protocol used to assess performance for each evaluated configuration.
-    \item Note: you can choose whether to divide this section and the next one by part 1 and part 2 (following project specific parts) or to keep them in the same text without specific subsections. Both options are valid.
-
-\end{itemize}
-
-
 Part 1 focused on learning a locomotion policy for the Hopper environment using policy-gradient methods.
 Three approaches were implemented and compared: REINFORCE, REINFORCE with baseline, and Actor-Critic architectures. (Sutton \& Barto, 2018)
 
@@ -42,8 +31,8 @@ In parallel, the critic minimizes the squared difference between the predicted s
 L_{\text{critic}} = \mathbb{E}\left[\left(r_t+\gamma V_\phi(s_{t+1})-V_\phi(s_t)\right)^2\right].
 \]
 
-Since we're considering a continuous enviroment, all models policy outputs both the mean and standard
-deviations of a Gaussian action distribution:
+Since we are considering a continuous enviroment, all models policy outputs both the mean and standard
+deviation of a Gaussian action distribution:
 
 \[
 a_t \sim \mathcal N(\mu_\theta(s_t), \sigma_\theta(s_t)),
@@ -60,7 +49,7 @@ was implemented. (Schulman et al., 2015) Therefore, advantages are computed as:
 \hat A_t^{GAE} = \sum_{l=0}^{\infty} (\gamma\lambda)^l \delta_{t+l}
 \]
 
-Where:
+where
 
 \[
 \delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)
@@ -71,50 +60,20 @@ is the temporal-difference error.
 In this way, GAE provides a compromise between using a low-variance TD(0)
 estimate and a high variance Monte Carlo approach that considers the episode full return.
 
-The final Actor-Critic configuration employed a discount factor $\gamma = 0.99$,
-a GAE parameter $\lambda = 0.95$, a learned action variance, and a minimum variance threshold (sigma floor = 0.1).
-Training was performed for more than 70,000 episodes in order to allow the policy sufficient time to discover and
-refine locomotion behaviours. These hyperparameters were selected empirically to balance exploration,
-learning stability, and long-term performance.
-
-
-\begin{table}[h]
-\centering
-\caption{Actor-Critic Hyperparameters}
-\begin{tabular}{ll}
-\hline
-Hyperparameter & Value \\
-\hline
-Discount Factor ($\gamma$) & 0.99 \\
-GAE Lambda ($\lambda$) & 0.95 \\
-Learning Rate & $3 \times 10^{-4}$ \\
-Minimum Learning Rate After Decay & $1 \times 10^{-5}$ \\
-Sigma Floor & 0.1 \\
-Initial Learned Sigma & 0.5 (through Softplus + Sigma Floor) \\
-Entropy Coefficient & 0.0 \\
-Training Episodes & 120,000 \\
-Learning Rate Decay Trigger & $\sim$45,000 episodes (performance-triggered) \\
-Hidden Layers & 64, 64 \\
-Activation Function & Tanh \\
-Optimizer & Adam \\
-\hline
-\end{tabular}
-\end{table}
-
-
 Subsequently, advantages were normalized before policy updates in order to stabilize gradients,
-stabilize critic's estimates and reduce training instability. A minimum standard deviation (sigma floor)
+improve critic's estimates and reduce training instability. A minimum standard deviation (sigma floor)
 was enforced to prevent premature collapse of exploration and continue promoting exploration even in later stages.
 Additionally, a triggered learning-rate decay mechanism was introduced during later stages of training with the aim
 of stabilizing training by reducing update magnitude after the policy had discovered effective locomotion behaviors.
 
 
-More specifically, the decay was activated only once one of the following trigger conditions was satisfied, which
+More specifically, the decay was activated only once one of the trigger conditions reported in Table~\ref{tab:lr_decay} was satisfied, which
 caused the learning rate to linearly reduce from $3 \times 10^{-4}$ to $10^{-5}$ until the end of training.
 
 \begin{table}[ht]
 \centering
 \caption{Learning Rate Decay Triggers}
+\label{tab:lr_decay}
 \begin{tabular}{ll}
 \hline
 Trigger condition & Threshold \\
@@ -129,15 +88,49 @@ Minimum learning rate & $10^{-5}$ \\
 \end{table}
 
 The goal was to reduce update magnitude once the Hopper had likely discovered jumping, as this behaviour leads to
-higher rewards but while being much more unstable. The thresholds were chosen empirically: high average reward together
-with long episode length meant sustained hopping was disovered, and also best\_avg\_reward $\geq$ 1500 indicated clear
-high-performance runs. The 45,000-episode condition acted as a fallback that would have forced the LR decay initialisation,
-again this threshold value was set based on previous runs, which showed that hopping usually emerged around 40k--45k episodes.
+higher rewards while being much more unstable. All the thresholds were chosen empirically.
+
+% high average reward together
+% with long episode length meant sustained hopping was disovered, and also best\_avg\_reward $\geq$ 1500 indicated clear
+% high-performance runs. The 45,000-episode condition acted as a fallback that would have forced the LR decay initialisation,
+% again this threshold value was set based on previous runs, which showed that hopping usually emerged around 40k--45k episodes.
+
+The final Actor-Critic configuration employed a discount factor $\gamma = 0.99$,
+a GAE parameter $\lambda = 0.95$, a learned action variance, and a minimum variance threshold (sigma floor = 0.1).
+Training was performed for 70,000 episodes in order to allow the policy sufficient time to discover and
+refine locomotion behaviours. The learning-rate decay thresholds and all other hyperparameters were selected empirically
+based on preliminary training runs and were the ones that best balanced exploration, learning stability, and long-term performance.
+
+
+\begin{table}[h]
+\centering
+\caption{Final Actor-Critic Configuration}
+\label{tab:ac_configuration}
+\begin{tabular}{ll}
+\hline
+Hyperparameter & Value \\
+\hline
+Discount Factor ($\gamma$) & 0.99 \\
+GAE Lambda ($\lambda$) & 0.95 \\
+Learning Rate & $3 \times 10^{-4}$ \\
+Minimum Learning Rate After Decay & $1 \times 10^{-5}$ \\
+Sigma Floor & 0.1 \\
+Initial Learned Sigma & 0.5 (through Softplus + Sigma Floor) \\
+Entropy Coefficient & 0.0 \\
+Training Episodes & 70,000 \\
+Learning Rate Decay Trigger & Performance-triggered with $\sim$45k episodes fallback \\
+Hidden Layers & 64, 64 \\
+Activation Function & Tanh \\
+Optimizer & Adam \\
+\hline
+\end{tabular}
+\end{table}
+
 
 All these modifications were designed to improve training stability, maintain sufficient exploration, and allow longer
 training horizons without facing policy collapses.
 
-Performance was evaluated using numeruous training diagnostics, such as episodic reward, rolling average reward over the
+Performance was evaluated using numerous training diagnostics, such as episodic reward, rolling average reward over the
 last 100 episodes, episode length, policy entropy, learned action standard deviation, actor loss and critic loss.
 During the training phase all the mentioned evaluation metrics were monitored to supervise the learning progress,
 exploration behaviour, value-function stability, and policy convergence.
