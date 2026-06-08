@@ -35,12 +35,16 @@ a much more effective variance reduction at each step.
 This consideration leads to choosing the learned value function $V^\pi(s)$ over the constant baseline, just like the Actor-Critic method does.
 
 
-The results obtained in the first part demonstrate that the proposed Actor-Critic framework successfully learned a
-locomotion policy for the Hopper environment. Indeed, the Hopper discovered balancing and forward locomotion behaviours, 
-with an average reward around 2000 and occasional episodes reaching scores above 3000. These results demonstrate that the agent
-discovered effective hopping. Nevertheless, training did not fully converge to a stable hopping policy: significant reward
-variance remained throughout the final stages of training, indicating that the learned policy was still too exploratory and
-stochastic, causing it to be unable to reproduce its best behaviors consistently.
+The results obtained in the first part demonstrate that the proposed Actor-Critic framework successfully learned a locomotion policy for the Hopper environment.
+Indeed, as Figure~\ref{fig:experiments_reward} shows, the Hopper initially discovered balancing and survival behaviours in the first 40,000 episodes, resulting in relatively
+low rewards and short episode lengths.
+Subsequently, a sharp performance improvement occurred between 40,000 and 55,000 episodes, corresponding to an increase of both reward
+and episode duration, suggesting that the agent discovered forward locomotion for the first time.
+After this transition phase, training entered a high-performance regime in which average rewards approached 2000 and individual episodes
+occasionally exceeded a reward of 3000.
+These results demonstrate that the agent discovered effective hopping.
+Nevertheless, training did not fully converge to a stable hopping policy: significant reward variance remained throughout the final stages of training, 
+indicating that the learned policy was still too exploratory and stochastic, causing it to be unable to reproduce its best behaviors consistently.
 
 This result represents a substantial improvement compared to earlier Actor-Critic implementations tested during development.
 Preliminary versions frequently converged to a "lazy" policy in which the Hopper stood still, which can mathematically occur
