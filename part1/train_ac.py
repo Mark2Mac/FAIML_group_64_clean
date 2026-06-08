@@ -71,21 +71,21 @@ def main():
 
     for run in range(1, NUM_RUNS + 1):
         print(f"\n--- Run {run}/{NUM_RUNS} ---")
-
+        seed = args.seed + run - 1
         if args.wandb:
             import wandb
             wandb.init(
                 entity="s355100-politecnico-di-torino",
                 project=args.project,
-                group="Actor-Critic",
-                name=f"AC_run_{run}_lr_{args.lr}_entropy_{args.entropy_coef}_seed_{args.seed}",
+                group=f"AC_seed_{seed}",
+                name=f"AC_run_{run}_lr_{args.lr}_entropy_{args.entropy_coef}_seed_{seed}",
                 config={
                     "algorithm": "Actor-Critic",
                     "learning_rate": args.lr,
                     "episodes": NUM_EPISODES,
                     "run_id": run,
 
-                    "seed": args.seed + run,
+                    "seed": args.seed + run - 1,
 
                     "gae_lambda": args.gae_lambda,
                     "sigma_floor": args.sigma_floor,
@@ -103,7 +103,6 @@ def main():
             )
             
 
-        seed = args.seed + run
         set_seed(seed)
         if args.wandb: 
             wandb.config.update({"seed": seed})
@@ -166,8 +165,7 @@ def main():
 
             if episode >= 100 and avg_reward_100 > best_avg_reward:
                 best_avg_reward = avg_reward_100
-                # best_model_path = f"part1/models/policy_actor_critic_run_{run}_best.pth"
-                best_model_path = f"{args.output_dir}/policy_{args.run_tag}_run_{run}_best.pth"
+                best_model_path = f"{args.output_dir}/policy_{args.run_tag}_seed_{seed}_run_{run}_best.pth"
                 torch.save(agent.policy.state_dict(), best_model_path)
 
 
@@ -252,28 +250,15 @@ def main():
         elapsed = time.time() - start_time
         print(f"Training time (actor-critic, run={run}): {elapsed/60:.1f} min")
 
-        # model_path = f"part1/models/policy_actor_critic_run_{run}.pth"
-        # torch.save(agent.policy.state_dict(), model_path)
-
-        # np.save(f"part1/models/rewards_actor_critic_run_{run}.npy", np.array(rewards_log))
-        # np.save(f"part1/models/lengths_actor_critic_run_{run}.npy", np.array(lengths_log))
-        # np.save(f"part1/models/actor_losses_actor_critic_run_{run}.npy", np.array(actor_losses_log))
-        # np.save(f"part1/models/critic_losses_actor_critic_run_{run}.npy", np.array(critic_losses_log))
-        
-        # [NEW]
-        # np.save(f"part1/models/diagnostics_actor_critic_run_{run}.npy", np.array(diagnostics_log, dtype=object))
-
-        # np.save(f"part1/models/time_actor_critic_run_{run}.npy", np.array([elapsed]))
-
-        model_path = f"{args.output_dir}/policy_{args.run_tag}_run_{run}.pth"
+        model_path = f"{args.output_dir}/policy_{args.run_tag}_seed_{seed}_run_{run}.pth"
         torch.save(agent.policy.state_dict(), model_path)
 
-        np.save(f"{args.output_dir}/rewards_{args.run_tag}_run_{run}.npy", np.array(rewards_log))
-        np.save(f"{args.output_dir}/lengths_{args.run_tag}_run_{run}.npy", np.array(lengths_log))
-        np.save(f"{args.output_dir}/actor_losses_{args.run_tag}_run_{run}.npy", np.array(actor_losses_log))
-        np.save(f"{args.output_dir}/critic_losses_{args.run_tag}_run_{run}.npy", np.array(critic_losses_log))
-        np.save(f"{args.output_dir}/diagnostics_{args.run_tag}_run_{run}.npy", np.array(diagnostics_log, dtype=object))
-        np.save(f"{args.output_dir}/time_{args.run_tag}_run_{run}.npy", np.array([elapsed]))
+        np.save(f"{args.output_dir}/rewards_{args.run_tag}_seed_{seed}_run_{run}.npy", np.array(rewards_log))
+        np.save(f"{args.output_dir}/lengths_{args.run_tag}_seed_{seed}_run_{run}.npy", np.array(lengths_log))
+        np.save(f"{args.output_dir}/actor_losses_{args.run_tag}_seed_{seed}_run_{run}.npy", np.array(actor_losses_log))
+        np.save(f"{args.output_dir}/critic_losses_{args.run_tag}_seed_{seed}_run_{run}.npy", np.array(critic_losses_log))
+        np.save(f"{args.output_dir}/diagnostics_{args.run_tag}_seed_{seed}_run_{run}.npy", np.array(diagnostics_log, dtype=object))
+        np.save(f"{args.output_dir}/time_{args.run_tag}_seed_{seed}_run_{run}.npy", np.array([elapsed]))
         env.close()
 
         if args.wandb:

@@ -4,6 +4,7 @@ import argparse
 import gymnasium as gym
 import numpy as np
 import torch
+import random
 
 from agent import Agent, Policy
 
@@ -34,11 +35,14 @@ def main():
         for run in range(1, NUM_RUNS + 1):
             print(f"\n--- Run {run}/{NUM_RUNS} ---")
 
+            seed = args.seed + run - 1
+
             if args.wandb:
                 import wandb
                 wandb.init(
+                    entity="s355100-politecnico-di-torino",
                     project=args.project,
-                    group=f"REINFORCE_b_{baseline}",
+                    group=f"REINFORCE_seed_{seed}_b_{baseline}",
                     name=f"REINFORCE_b_{baseline}_run_{run}_lr_{args.lr}",
                     config={
                         "algorithm": "REINFORCE",
@@ -46,14 +50,18 @@ def main():
                         "learning_rate": args.lr,
                         "episodes": NUM_EPISODES,
                         "run_id": run,
-                        "seed": args.seed + run
+                        "seed": args.seed + run - 1
                     },
                     reinit=True
                 )
 
-            seed = args.seed + run
-            torch.manual_seed(seed)
+            random.seed(seed)
             np.random.seed(seed)
+            torch.manual_seed(seed)
+
+            if torch.cuda.is_available():
+                torch.cuda.manual_seed(seed)
+                torch.cuda.manual_seed_all(seed)
 
             env = gym.make('Hopper-v4')
             policy = Policy(env.observation_space.shape[0], env.action_space.shape[0])
@@ -100,7 +108,7 @@ def main():
                     best_avg_reward = avg100
                     best_model_path = (
                         f"{args.output_dir}/policy_{args.run_tag}"
-                        f"_baseline_{baseline}_run_{run}_best.pth"
+                        f"_baseline_{baseline}_seed_{seed}_run_{run}_best.pth"
                         )
                     torch.save(agent.policy.state_dict(), best_model_path)
 
@@ -130,32 +138,32 @@ def main():
             # Save files including the run number in the filename
             model_path = (
                 f"{args.output_dir}/policy_{args.run_tag}"
-                f"_baseline_{baseline}_run_{run}.pth"
+                f"_baseline_{baseline}_seed_{seed}_run_{run}.pth"
                 )
             torch.save(agent.policy.state_dict(), model_path)
 
             np.save(
-                f"{args.output_dir}/rewards_{args.run_tag}_baseline_{baseline}_run_{run}.npy",
+                f"{args.output_dir}/rewards_{args.run_tag}_baseline_{baseline}_seed_{seed}_run_{run}.npy",
                 np.array(rewards_log)
             )
 
             np.save(
-                f"{args.output_dir}/lengths_{args.run_tag}_baseline_{baseline}_run_{run}.npy",
+                f"{args.output_dir}/lengths_{args.run_tag}_baseline_{baseline}_seed_{seed}_run_{run}.npy",
                 np.array(lengths_log)
             )
 
             np.save(
-                f"{args.output_dir}/losses_{args.run_tag}_baseline_{baseline}_run_{run}.npy",
+                f"{args.output_dir}/losses_{args.run_tag}_baseline_{baseline}_seed_{seed}_run_{run}.npy",
                 np.array(losses_log)
             )
 
             np.save(
-                f"{args.output_dir}/time_{args.run_tag}_baseline_{baseline}_run_{run}.npy",
+                f"{args.output_dir}/time_{args.run_tag}_baseline_{baseline}_seed_{seed}_run_{run}.npy",
                 np.array([elapsed])
             )
 
             np.save(
-                f"{args.output_dir}/best_episode_reward_{args.run_tag}_baseline_{baseline}_run_{run}.npy",
+                f"{args.output_dir}/best_episode_reward_{args.run_tag}_baseline_{baseline}_seed_{seed}_run_{run}.npy",
                 np.array([best_episode_reward])
             )
 
