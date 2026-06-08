@@ -4,37 +4,13 @@
 Guidelines:
 \begin{itemize}
     \item Implementation of the different algorithms, including relevant loss functions and design choices
-    \begin{itemize}
-        \item Pt1: ok
-        \item Pt2: \ldots
-    \end{itemize}
-
     \item Explain which advanced RL argument has been used, the selection of hyperparameters, ecc.
-    \begin{itemize}
-        \item Pt1: ok
-        \item Pt2: \ldots
-    \end{itemize}
-
     \item Domain Randomization: Detail the implemented UDR and ADR strategies, including the chosen mass ranges, adaptation rules, and relevant hyperparameters.
-    \begin{itemize}
-        \item Pt1: ok
-        \item Pt2: \ldots
-    \end{itemize}
-
     \item Anything else that is related to the specific project ideas and implementations Evaluation Metrics: Clearly define the metrics and protocol used to assess performance for each evaluated configuration.
-    \begin{itemize}
-        \item Pt1: ok
-        \item Pt2: \ldots
-    \end{itemize}
-
     \item Note: you can choose whether to divide this section and the next one by part 1 and part 2 (following project specific parts) or to keep them in the same text without specific subsections. Both options are valid.
-    \begin{itemize}
-        \item Pt1: ok
-        \item Pt2: \ldots
-    \end{itemize}
+
 \end{itemize}
 
-\textbf{I wrote this part and it's still flagged as AI???}
 
 Part 1 focused on learning a locomotion policy for the Hopper environment using policy-gradient methods.
 Three approaches were implemented and compared: REINFORCE, REINFORCE with baseline, and Actor-Critic architectures. (Sutton \& Barto, 2018)
@@ -47,11 +23,10 @@ L = -\sum_t \left(G_t - b\right) \log \pi_\theta(a_t | s_t)
 
 
 
-where $G_t = \sum_{k=0}^{T-t} \gamma^k r_{t+k}$ is the discounted return from timestep $t$ and $b$ is a baseline. This formulation keeps the gradient estimator unbiased regardless of the choice of $b$, since $\mathbb{E}[\nabla_\theta \log \pi_\theta \cdot b] = 0$ for any constant, but is subject to high variance due to the stochastic nature of full-episode returns. In the first variant $b = 0$, we have vanilla REINFORCE. In the second, a constant baseline $b = 20$ is subtracted from the return, reducing gradient variance by centering the return signal without affecting the gradient direction. 
+where $G_t$ is the discounted return from timestep $t$, $b$ is a baseline and $G_t = \sum_{k=0}^{T-t} \gamma^k r_{t+k}$. This formulation ensures that the gradient estimator is unbiased for any choice of $b$, because $\mathbb{E}[\nabla_\theta \log \pi_\theta \cdot b] = 0$ for any constant. However, it has high variance due to the stochasticity of full-episode returns. In the first variant $b=0$ we have vanilla REINFORCE. In the second, the return is shifted by a constant baseline $b = 20$. This helps to reduce the variance of the gradient by centering the return signal, but does not affect the direction of the gradient. 
+Both variants share the same policy network and training configuration: a two-layer MLP with hidden sizes [64, 64] and Tanh activations, trained using the Adam optimizer with learning rate $3 \times 10^{-4}$ and discount factor $\gamma = 0.99$.
 
-Both variants share the same policy network and training configuration: a two-layer MLP with hidden sizes [64, 64] and Tanh activations, with orthogonal weight initialization, trained using the Adam optimizer with learning rate $3 \times 10^{-4}$ and discount factor $\gamma = 0.99$.
-
-
+We used orthogonal initialization \cite{saxe2013exact} instead of the standard normal weight initialization for better training stability. The hidden layers used a gain of $\sqrt{2}$ to keep the gradient norms and avoid exploding or vanishing gradients. Furthermore, the output layer of the actor was initialized with a low gain of 0.01. This makes sure the initial policy outputs action values close to zero, stopping extreme movements that would destabilize the Hopper right away. Therefore, the early exploration is entirely governed by the learned standard deviation, which allows the agent to survive for a longer period of time and collect better trajectories during the initial training stage \cite{andrychowicz2020matters}.
 
 The final implementation uses an Actor-Critic architecture, where the actor learns the policy while the critic estimates
 the value function. The actor updates the policy based on the estimated advantages, modifying the probability of actions

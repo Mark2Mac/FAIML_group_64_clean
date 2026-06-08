@@ -4,12 +4,17 @@ a sim-to-sim setting. The work is divided into two complementary parts. In the f
 methods implementation in the Hopper continuous-control environment, including REINFORCE, REINFORCE with baseline,
 and Actor-Critic architectures. Several improvements were introduced, including Generalized Advantage Estimation (GAE),
 advantage normalization, a learned exploration variance with a sigma floor, and a triggered learning-rate decay mechanism.
+
+
 The resulting REINFORCE agent with and without fixed baseline both performed similarly with an average reward of WAITING FOR MORE DATA. 
 The resulting Actor-Critic agent successfully learned forward locomotion, achieving average rewards around 2000 and individual
 episodes exceeding 3000, however a significant reward variability remained throughout training.
 
+
 In the second part, sim-to-sim transfer methods were deployed on the PandaPush environment, using Proximal Policy Optimization (PPO),
 Soft Actor-Critic (SAC), Uniform Domain Randomization (UDR), and Automatic Domain Randomization (ADR).
+
+
 Experimental results showed that SAC outperformed PPO, while UDR achieved the best transfer performance among the
 evaluated sim-to-real strategies. Compared to vanilla SAC, UDR reduced the sim-to-real gap by approximately 66\%, generating
 a sturdier model able to adapt to a borader range of weights, resulting in an overall better model for generalization
