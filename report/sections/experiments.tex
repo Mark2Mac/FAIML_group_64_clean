@@ -2,46 +2,60 @@
 
 \subsection{Part 1 Results: Hopper Continuous Control}
 
-Guidelines:
-\begin{itemize}
-    \item MANDATORY The Results Table: Present the mandatory results table clearly, including all required training$\rightarrow$test configurations.
-    \begin{itemize}
-        \item \textbf{MISSING}
-    \end{itemize}
+All three algorithms were trained for 70{,}000 episodes on the Hopper-v4 environment, repeated across three independent seeds. Table~\ref{tab:part1_results} summarises the training performance; Figure~\ref{fig:experiments_reward} shows the learning curves (rolling average over 100 episodes $\pm$ standard deviation across seeds). In the table, \emph{Best Avg-100} is the peak value of the 100-episode rolling mean (averaged over seeds); \emph{Final Avg-100} is the mean return over the last 100 training episodes; \emph{Std} is the standard deviation computed over all 70{,}000 episodes across all seeds; \emph{Best Episode} is the highest single-episode return observed per seed, averaged across seeds; \emph{Avg Ep.\ Len} is the mean episode length over the full 70{,}000 training episodes across all seeds; \emph{Time (min)} is the total time required to train the agent.
 
-    \item Quantitative Breakdown: Describe the numbers objectively.
-    \begin{itemize}
-        \item Ok
-    \end{itemize}
+\begin{table}[ht]
+\centering
+\caption{training performance on Hopper-v4 (mean over 3 seeds).}
+\label{tab:part1_results}
+\resizebox{\linewidth}{!}{%
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lrrrrcc}
+\hline
+\textbf{Algorithm} & \textbf{Best Avg-100} & \textbf{Final Avg-100} & \textbf{Std} & \textbf{Best Episode} & \textbf{Avg Ep.\ Len} & \textbf{Time (min)} \\
+\hline
+REINFORCE ($b{=}0$)  & 1006 & 635  & 257 & 2811 & 178 & 57.6 \\
+REINFORCE ($b{=}20$) & 1807 & 806  & 399 & 3152 & 215 & 70.3 \\
+Actor-Critic         & \textbf{1938} & \textbf{1360} & \textbf{734} & \textbf{3480} & \textbf{249} & \textbf{83.8} \\
+\hline
+\end{tabular}%
+}
+\end{table}
 
-    \item Point out where the policies performed well
-    \begin{itemize}
-        \item Ok
-    \end{itemize}
+\begin{table}[ht]
+\centering
+\caption{test performance on Hopper-v4.}
+\label{tab:part1_test_results}
+\resizebox{\linewidth}{!}{%
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lccc}
+\hline
+\textbf{Algorithm} & \textbf{Seed} & \textbf{Test Return (Mean $\pm$ Std)} & \textbf{Test Length (Mean $\pm$ Std)} \\
+\hline
+REINFORCE ($b{=}0$)  & 1 & $710 \pm 484$ & $281 \pm 158$ \\
+                     & 2 & $726 \pm 296$ & $230 \pm 85$ \\
+                     & 3 & $1305 \pm 547$ & $582 \pm 283$ \\
+\hline
+REINFORCE ($b{=}20$) & 1 & $782 \pm 929$ & $304 \pm 350$ \\
+                     & 2 & $1461 \pm 1097$ & $461 \pm 330$ \\
+                     & 3 & $2444 \pm 182$ & $976 \pm 75$ \\
+\hline
+Actor-Critic         & 1 & $1725 \pm 1382$ & $555 \pm 432$ \\
+                     & 2 & $\mathbf{3335 \pm 14}$ & $\mathbf{1000 \pm 0}$ \\
+                     & 3 & $760 \pm 111$ & $251 \pm 30$ \\
+\hline
+\end{tabular}%
+}
+\end{table}
 
-    \item Point out where they failed
-    \begin{itemize}
-        \item Ok
-    \end{itemize}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\linewidth]{imgs/experiments_reward.pdf}
+    \caption{Average return (rolling window $= 100$ episodes) $\pm$ standard deviation across 3 seeds for REINFORCE ($b{=}0$, $b{=}20$) and Actor-Critic on Hopper-v4.}
+    \label{fig:experiments_reward}
+\end{figure}
 
-    \item Tables and figures can (and should) be inserted to make the results clear to the reader.
-    \begin{itemize}
-        \item \textbf{MISSING}
-    \end{itemize}
-
-    \item Example 1 from guidelines: reinforce, reinforce + baseline and actor critic could be compared using a plot with mean and std over time to show the specific features/behaviour of the algorithms $\Rightarrow$ Comparison across algorithms.
-    \begin{itemize}
-        \item \textbf{MISSING: We don't have something like this}
-    \end{itemize}
-\end{itemize}
-
-Note:
-\begin{itemize}
-    \item Results using 120k steps or 50k? (I'll use the 12k steps because it's the one I know the results best)
-    \item I've pasted a few graphs but do we won't use all of them, select whatever you want
-\end{itemize}
-
-We ran the Actor-Critic for 70,000 training episodes and it successfully learned a locomotion policy for the Hopper environment.
+We ran the Actor-Critic for 70{,}000 training episodes and it successfully learned a locomotion policy for the Hopper environment.
 As we can see from the graph X (there should be the graph number), training can be divided into four distinct phases.
 
 During the first phase (0--40k episodes), the agent learned balancing and standing behaviors, but not forward locomotion yet.
