@@ -97,51 +97,35 @@ Nevertheless, the large differences between seeds indicate that learning remaine
 
 
 \subsection{Part 2 Results: PandaPush Sim-to-Sim Transfer}
+Table \ref{tab:sim2real_results} shows the performance of the evaluated algorithms across different train and test configurations. 
+As a baseline, PPO failed to consistently solve the task even on the source environment, plateauing at a mean return of -3.485. In contrast, SAC successfully learned the pushing behavior.
 
-Idea:
-\begin{itemize}
-    \item Show results of each algorithm $\Rightarrow$ SAC + UDR $\rightarrow$ SAC + ADR $\rightarrow$ SAC $\rightarrow$ PPO
-    \item Reality gap $\Rightarrow$ vanilla SAC vs upper bound ; SAC + UDR vs upper bound
-    \item Mass-sensitivity analysis $\Rightarrow$ vanilla SAC sucks and SAC + UDR achieves better results for general purpose
-    \item Again, not sure about the correctness and pretty AI
-\end{itemize}
+To evaluate the sim-to-real transfer, we established a lower bound using vanilla SAC trained on the source and tested on the target environment, which achieved a return of -0.633. The upper bound was established by training and testing SAC directly on the target environment, yielding a return of -0.445. 
 
-\textbf{(Marco ha messo una tabella in report insights pt2 ma è gigantesca, inserirei separatamente le tabelle per i valori richiesti (Source-Source, Source-Target già fatta))}
-\textbf{Risultati PPO per source-source: return -3.485 +- 0.091 sr 20\% +- 0.1, target->target solo su sac}
+The reality gap is evident in the performance drop of vanilla SAC. Applying domain randomization successfully mitigated this gap. While ADR improved the transfer return to -0.556, UDR achieved the best overall transfer performance with a return of -0.509 and a 99.7\% success rate. Relative to the upper bound, UDR successfully closed approximately 66\% of the reality gap.
 
 \begin{table}[h]
 \centering
-\begin{tabular}{lcc}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lcccc}
 \hline
-Method & Target Return & Target Success Rate \\ 
-\hline
-PPO & $-3.496 \pm 0.051$ & $20\% \pm 0.1\%$ \\
-SAC (none) & $-0.633 \pm 0.152$ & $97.5\% \pm 0.3\%$ \\
-SAC + ADR & $-0.556 \pm 0.044$ & $99.2\%$ \\
-\textbf{SAC + UDR} & $\mathbf{-0.509 \pm 0.032}$ & $\mathbf{99.7\%}$ \\
-Oracle & $-0.445 \pm 0.019$ & $100\%$ \\
-\hline
-\end{tabular}
-\caption{Target-environment performance comparison.}
-\label{table:target_performance}
+\textbf{Algorithm \& Strategy} & \textbf{Train Env} & \textbf{Test Env} & \textbf{Mean Return} & \textbf{Success Rate} \\ \hline
+PPO (Vanilla) & Source & Source & $-3.485 \pm 0.091$ & $20.0\% \pm 0.1\%$ \\
+SAC (Vanilla) & Source & Source & $-0.565 \pm 0.118$ & $98.5\% \pm 2.1\%$ \\
+SAC (Vanilla) - Lower Bound & Source & Target & $-0.633 \pm 0.152$ & $97.5\% \pm 0.3\%$ \\
+SAC + ADR & Source & Target & $-0.556 \pm 0.044$ & $99.2\% \pm 1.1\%$ \\
+SAC + UDR - Best Transfer & Source & Target & $-0.509 \pm 0.032$ & $99.7\% \pm 0.4\%$ \\
+SAC (Oracle) - Upper Bound & Target & Target & $-0.445 \pm 0.019$ & $100.0\% \pm 0.0\%$ \\ \hline
+\end{tabular}%
+}
+\vspace{2mm}
+\caption{Target-environment performance comparison across different training strategies.}
+\label{tab:sim2real_results}
 \end{table}
 
-The results clearly show that SAC outperforms PPO, both on source and training environments \ref{table:target_performance}. Even after an extensive hyperparameter tuning, PPO consistently plateaued around a return of -3.0 and failed to solve the task consistently (success rate:$\sim 20\%$). On the other hand, SAC successfully learned effective pushing policies and transferred well to the target environment.
-
-Uniform Domain Randomization (UDR) achieved the best performance, outperforming both vanilla SAC and Automatic Domain Randomization (ADR). It achieved a target return of -0.509 compared to -0.556 for ADR and -0.633 for vanilla SAC. The policy obtained training directly on the target environment (oracle) achieved the best overall result (-0.445) but is not a valid sim-to-real solution because it has access to target dynamics during training, it only represents the upper bound.
-
-The reality gap can be measured relative to the oracle.
-\begin{itemize}
-    \item The gap between vanilla SAC and the oracle is $(-0.445)-(-0.633)=0.188$.
-    \item The gap between SAC + UDR and the oracle is $(-0.445)-(-0.509)=0.064$.
-\end{itemize}
-
-Therefore, the fraction of the gap removed by UDR is
-\[
-\frac{0.188-0.064}{0.188}=0.6596,
-\]
-corresponding to approximately 66\%.
-
-This result indicates that UDR eliminates about two-thirds of the performance loss caused by the source-to-target mass shift.
-
-Finally a mass-sensitivity analysis was conducted to further highlight the robustness gained thanks to domain randomization techniques. When evaluated at increasingly heavier masses, vanilla SAC deteriorates from -0.554 at 1 kg to -0.869 at 15 kg. In contrast, UDR only decreases from -0.478 to -0.592 over the same range. This demonstrates that UDR learns a policy that is robust across a wide range of dynamics rather than specialized to a single mass value.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\columnwidth]{imgs/eval_mean_return.png}
+    \caption{Mean return comparison across training strategies}
+    \label{fig:eval_return}
+\end{figure}

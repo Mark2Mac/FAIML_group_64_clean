@@ -3,8 +3,7 @@
 The results highlight how the vanilla REINFORCE algorithm struggled to discover a policy that allows the locomotion of the Hopper, achieving a low average reward during training (around $1006$) and displaying low test returns (ranging from $710$ to $1305$).
 Practically this means that the agent cannot effectively hop but at most it stays still trying not to fall and at most leap forward and fall. 
 
-This is expected because, as seen in the methodology section, the algorithm uses the raw Monte Carlo return (the discounted sum of future rewards from each timestep)
-to estimate the policy gradient. Because the gradient estimate depends on the full trajectory return $G_t$, which accumulates all future rewards and varies substantially across episodes, these returns suffer from high variance, this causes noisy gradient updates leading to an inefficient learning and slow convergence.
+As expected, vanilla REINFORCE struggled due to the high variance of full-trajectory Monte Carlo returns, which causes noisy gradient updates, leading to inefficient learning and slow convergence.
 
 Regarding the time needed for training, this was the fastest among the three with a value of $57.6$ minutes, in fact this is primarily driven by episode length,
 the Hopper in this case often falls causing the early termination of the episode (the average episode length is $178$), reducing the computational time needed for the learning process.
@@ -19,21 +18,7 @@ This also improved the average episode length, which increased from 178 to 215, 
 This is also reflected in the average training time that was significantly higher with a value of $70.3$ minutes, proving that the agent
 was not falling for a longer period of time.
 
-In order to choose a better baseline one should consider the expected reward of $1006$ for the vanilla version of REINFORCE. The discrepancy between this value and the selected baseline ($b{=}20$) implies that there was indeed a reduction in variance, however, this is far from optimal. 
-Whatever baseline is chosen, fixed or state-dependent ($b(s)$), the estimator is still unbiased due to the fact that $\mathbb{E}_{\pi}[\nabla_\theta \log \pi_\theta(a|s) \cdot b(s)] = 0$.
-
-A fixed baseline, however, is a poor choice in general, since it applies 
-a global correction that is identical across all states, ignoring the 
-fact that the expected return varies significantly depending on the 
-current state of the agent. 
-
-A state-dependent baseline $b(s)$ can 
-instead adapt to the local structure of the value function, providing 
-a much more effective variance reduction at each step.
-
-
-This consideration leads to choosing the learned value function $V^\pi(s)$ over the constant baseline, just like the Actor-Critic method does.
-
+While a constant baseline ($b=20$) reduced variance and improved performance over vanilla REINFORCE, it applies a global correction that is identical across all states. Actor-Critic further improved stability by using a state-dependent baseline $V(s)$, which adapts to the local structure of the value function, providing a much more effective variance reduction at each step.
 
 The results obtained in the first part demonstrate that the proposed Actor-Critic framework successfully learned a locomotion policy for the Hopper environment.
 Indeed, as Figure~\ref{fig:experiments_reward} shows, the Hopper initially discovered balancing and survival behaviours in the first 40,000 episodes, resulting in relatively
@@ -86,3 +71,11 @@ updates (Schulman et al., 2017).
 Furthermore, more advanced actor-critic methods for continuous control, such as DDPG and TD3, could be explored,
 exploiting double-critic architectures and delayed policy updates, to potentially reduce value-estimation errors
 and improve training stability (Fujimoto et al., 2018).
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\columnwidth]{imgs/sensitivity_return.png}
+    \caption{Mass-sensitivity analysis.}
+    \label{fig:sensitivity}
+\end{figure}
