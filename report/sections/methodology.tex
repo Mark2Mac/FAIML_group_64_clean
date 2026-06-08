@@ -74,12 +74,12 @@ caused the learning rate to linearly reduce from $3 \times 10^{-4}$ to $10^{-5}$
 \centering
 \caption{Learning Rate Decay Triggers}
 \label{tab:lr_decay}
-\begin{tabular}{ll}
+\begin{tabular}{l p{0.45\columnwidth}}
 \hline
 Trigger condition & Threshold \\
 \hline
-Rolling average reward and rolling average episode length & avg\_reward\_100 $\geq$ 1000 and avg\_length\_100 $\geq$ 500 \\
-Best rolling average reward & best\_avg\_reward $\geq$ 1500 \\
+Rolling avg. reward \& episode length & avg\_reward\_100$\geq$1000, avg\_length\_100 $\geq$ 500 \\
+Best rolling avg. reward & best\_avg\_reward $\geq$ 1500 \\
 Episode fallback trigger & episode $\geq$ 45,000 \\
 Initial learning rate & $3 \times 10^{-4}$ \\
 Minimum learning rate & $10^{-5}$ \\
@@ -104,7 +104,7 @@ balanced exploration, learning stability and long-term performance across.
 \centering
 \caption{Final Actor-Critic Configuration}
 \label{tab:ac_configuration}
-\begin{tabular}{ll}
+\begin{tabular}{l p{0.45\columnwidth}}
 \hline
 Hyperparameter & Value \\
 \hline
