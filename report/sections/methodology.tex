@@ -165,7 +165,7 @@ exploration behaviour, value-function stability, and policy convergence.
 
 
 
-\subsection{Part 2: PandaPush, SAC, PPO and Domain Randomization}
+\subsection{Part 2: PandaPush, PPO, SAC and Domain Randomization}
 
 Idea:
 \begin{itemize}
@@ -173,26 +173,36 @@ Idea:
 \end{itemize}
 
 Part 2 investigates sim-to-real transfer using the PandaPush-v3 robotic manipulation environment. The task consists of controlling a Franka Panda robotic arm to push a cube toward a desired target position.
-The observation space contains the robot state, cube state, and target position information. Actions are continuous Cartesian end-effector displacements, \textbf{what does it mean?}
+To move the arm, the chosen algorithm has control over the 7 joints of the robot, with the reward depending only on end-effector movements.
+Therefore, the agent must learn to coordinate joint movements in order to move the cube through the arm's end-effector and achieve task success.
+The observation space contains the robot state, cube state, and target position information. Actions are continuous Cartesian end-effector displacements, \textbf{need to double check this} defined as:
 \[
 a_t=[dx,dy,dz].
 \]
-The dense reward function is defined as
+
+The dense reward function is the euclidean distance between the cube and target positions, defined as
 \[
 r_t = -\left\| p_{obj}(t)-p_{goal} \right\|_2,
 \]
 where $p_{obj}$ and $p_{goal}$ denote the cube and target positions respectively. A task is considered successful when the final cube-target distance is below 5 cm.
 
-Two reinforcement-learning algorithms were evaluated.
+Two reinforcement-learning algorithms were evaluated: Proximal Policy Optimization (PPO) and Soft Actor-Critic (SAC).
 Proximal Policy Optimization (PPO) is an on-policy actor-critic algorithm that limits policy updates through a clipped objective,
 \[
-L^{CLIP} = \mathbb E \Big[ \min( \rho_t \hat A_t, \text{clip}(\rho_t,1-\epsilon,1+\epsilon)\hat A_t ) \Big].
+L^{CLIP} = \mathbb E \Big[ \min( \rho_t \hat A_t, \text{clip}(\rho_t,1-\epsilon,1+\epsilon)\hat A_t ) \Big],
 \]
+
+where $\hat A_t$ is the advantage estimate, $\epsilon$ is a hyperparameter that controls the clipping range, and
 
 \[
 \rho_t = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}
 \]
-The clipping mechanism improves stability but reduces sample efficiency because collected trajectories cannot be reused extensively. \textbf{formula rho da mettere meglio}
+
+is the probability ratio between the new and old policies.
+
+
+The idea behind this algorithm is that excessively large policy updates result in unstable training, so stability is achieved to keep policy updates within a trust region (PPO is in fact the direct evolution of the Trust Region Policy Optimization (TRPO) \cite{SchulmanTRPO2015} algorithm).
+The clipping mechanism improves stability but reduces sample efficiency because collected trajectories cannot be reused extensively.
 
 Soft Actor-Critic (SAC) is an off-policy actor-critic method that maximizes both reward and policy entropy,
 \[
