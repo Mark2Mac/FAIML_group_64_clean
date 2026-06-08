@@ -1,19 +1,10 @@
 \section{Conclusion}
-
-Guidelines:
-\begin{itemize}
-    \item best-performing algorithm: ok
-    \item effectiveness of domain randomization: ok
-    \item main limitation or possible future improvement: ok
-\end{itemize}
-
-This project investigated reinforcement learning for continuous control and sim-to-real transfer through
-two complementary tasks.
+This project investigated reinforcement learning for continuous control and sim-to-real transfer through two complementary tasks.
 
 In Part 1, the REINFORCE (with and without baseline) and a custom Actor-Critic framework was developed and all
 were applied to the Hopper environment. The proposed enhancements, including Generalized Advantage Estimation (GAE),
-advantage normalization, a learned policy standard deviation, a sigma floor, and triggered learning-rate decay, allowed
-to achieve an average rward of over 2000 and single episodes well over 3000, proving that they achieved successful learning
+advantage normalization, a learned policy standard deviation, a sigma floor and triggered learning-rate decay, allowed
+to achieve an average rward of around 2000 and single episodes well over 3000, proving that they achieved successful learning
 of locomotion behaviours.
 Nevertheless, significant reward variability and the lack of behavioral convergence persisted throughout training,
 indicating that the agent was not able to always replicate consistent hopping.
