@@ -1,0 +1,7 @@
+{
+  "strategy": "adr",
+  "env_type": "source",
+  "eval_env": "source",
+  "success_rate": 0.97,
+  "mean_return": -0.5847791692102328
+}

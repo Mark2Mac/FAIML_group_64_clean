@@ -1,0 +1,7 @@
+{
+  "strategy": "none",
+  "env_type": "target",
+  "eval_env": "target",
+  "success_rate": 1.0,
+  "mean_return": -0.418746684481157
+}

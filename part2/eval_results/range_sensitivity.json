@@ -1,0 +1,332 @@
+[
+  {
+    "label": "udr_range_0p5_5p0",
+    "mass": 0.5,
+    "success": 1.0,
+    "return": -0.4325158505269792
+  },
+  {
+    "label": "udr_range_0p5_5p0",
+    "mass": 1,
+    "success": 0.995,
+    "return": -0.43771224067895675
+  },
+  {
+    "label": "udr_range_0p5_5p0",
+    "mass": 2,
+    "success": 1.0,
+    "return": -0.4327315101528075
+  },
+  {
+    "label": "udr_range_0p5_5p0",
+    "mass": 3,
+    "success": 1.0,
+    "return": -0.43876008001039735
+  },
+  {
+    "label": "udr_range_0p5_5p0",
+    "mass": 4,
+    "success": 1.0,
+    "return": -0.4500827848014887
+  },
+  {
+    "label": "udr_range_0p5_5p0",
+    "mass": 5,
+    "success": 1.0,
+    "return": -0.463565985414898
+  },
+  {
+    "label": "udr_range_0p5_5p0",
+    "mass": 6,
+    "success": 1.0,
+    "return": -0.4753566642419901
+  },
+  {
+    "label": "udr_range_0p5_5p0",
+    "mass": 8,
+    "success": 1.0,
+    "return": -0.5057176930306013
+  },
+  {
+    "label": "udr_range_0p5_5p0",
+    "mass": 10,
+    "success": 1.0,
+    "return": -0.5254947396449279
+  },
+  {
+    "label": "udr_range_0p5_5p0",
+    "mass": 12,
+    "success": 1.0,
+    "return": -0.5585955301392823
+  },
+  {
+    "label": "udr_range_0p5_5p0",
+    "mass": 15,
+    "success": 1.0,
+    "return": -0.5915434291912243
+  },
+  {
+    "label": "udr_range_1p0_9p0",
+    "mass": 0.5,
+    "success": 0.99,
+    "return": -0.4657786401861813
+  },
+  {
+    "label": "udr_range_1p0_9p0",
+    "mass": 1,
+    "success": 0.965,
+    "return": -0.6108844941516872
+  },
+  {
+    "label": "udr_range_1p0_9p0",
+    "mass": 2,
+    "success": 0.975,
+    "return": -0.5329719847894739
+  },
+  {
+    "label": "udr_range_1p0_9p0",
+    "mass": 3,
+    "success": 0.98,
+    "return": -0.5244918199896347
+  },
+  {
+    "label": "udr_range_1p0_9p0",
+    "mass": 4,
+    "success": 0.985,
+    "return": -0.49625467546400615
+  },
+  {
+    "label": "udr_range_1p0_9p0",
+    "mass": 5,
+    "success": 0.995,
+    "return": -0.46604827510076574
+  },
+  {
+    "label": "udr_range_1p0_9p0",
+    "mass": 6,
+    "success": 0.995,
+    "return": -0.4688740808540024
+  },
+  {
+    "label": "udr_range_1p0_9p0",
+    "mass": 8,
+    "success": 1.0,
+    "return": -0.4642846703284886
+  },
+  {
+    "label": "udr_range_1p0_9p0",
+    "mass": 10,
+    "success": 1.0,
+    "return": -0.4877785647974815
+  },
+  {
+    "label": "udr_range_1p0_9p0",
+    "mass": 12,
+    "success": 1.0,
+    "return": -0.48620726545690557
+  },
+  {
+    "label": "udr_range_1p0_9p0",
+    "mass": 15,
+    "success": 1.0,
+    "return": -0.5164248848508578
+  },
+  {
+    "label": "udr_range_3p0_7p0",
+    "mass": 0.5,
+    "success": 1.0,
+    "return": -0.3862593401002232
+  },
+  {
+    "label": "udr_range_3p0_7p0",
+    "mass": 1,
+    "success": 1.0,
+    "return": -0.3993564691662323
+  },
+  {
+    "label": "udr_range_3p0_7p0",
+    "mass": 2,
+    "success": 1.0,
+    "return": -0.4075273093942087
+  },
+  {
+    "label": "udr_range_3p0_7p0",
+    "mass": 3,
+    "success": 1.0,
+    "return": -0.41056560935336167
+  },
+  {
+    "label": "udr_range_3p0_7p0",
+    "mass": 4,
+    "success": 1.0,
+    "return": -0.42393455448444
+  },
+  {
+    "label": "udr_range_3p0_7p0",
+    "mass": 5,
+    "success": 1.0,
+    "return": -0.4236226197122596
+  },
+  {
+    "label": "udr_range_3p0_7p0",
+    "mass": 6,
+    "success": 1.0,
+    "return": -0.4324117753643077
+  },
+  {
+    "label": "udr_range_3p0_7p0",
+    "mass": 8,
+    "success": 1.0,
+    "return": -0.4512474600959104
+  },
+  {
+    "label": "udr_range_3p0_7p0",
+    "mass": 10,
+    "success": 1.0,
+    "return": -0.46806352004758084
+  },
+  {
+    "label": "udr_range_3p0_7p0",
+    "mass": 12,
+    "success": 1.0,
+    "return": -0.484277714927448
+  },
+  {
+    "label": "udr_range_3p0_7p0",
+    "mass": 15,
+    "success": 0.995,
+    "return": -0.5305529398459475
+  },
+  {
+    "label": "udr_range_0p5_10p0",
+    "mass": 0.5,
+    "success": 0.99,
+    "return": -0.4929977188631892
+  },
+  {
+    "label": "udr_range_0p5_10p0",
+    "mass": 1,
+    "success": 0.985,
+    "return": -0.5102158013905864
+  },
+  {
+    "label": "udr_range_0p5_10p0",
+    "mass": 2,
+    "success": 1.0,
+    "return": -0.41615951572195625
+  },
+  {
+    "label": "udr_range_0p5_10p0",
+    "mass": 3,
+    "success": 1.0,
+    "return": -0.4185120299446862
+  },
+  {
+    "label": "udr_range_0p5_10p0",
+    "mass": 4,
+    "success": 1.0,
+    "return": -0.424806990645593
+  },
+  {
+    "label": "udr_range_0p5_10p0",
+    "mass": 5,
+    "success": 1.0,
+    "return": -0.4341541398211848
+  },
+  {
+    "label": "udr_range_0p5_10p0",
+    "mass": 6,
+    "success": 1.0,
+    "return": -0.4453257891430985
+  },
+  {
+    "label": "udr_range_0p5_10p0",
+    "mass": 8,
+    "success": 0.995,
+    "return": -0.47591652518487537
+  },
+  {
+    "label": "udr_range_0p5_10p0",
+    "mass": 10,
+    "success": 1.0,
+    "return": -0.48814823472755964
+  },
+  {
+    "label": "udr_range_0p5_10p0",
+    "mass": 12,
+    "success": 1.0,
+    "return": -0.5039620200113859
+  },
+  {
+    "label": "udr_range_0p5_10p0",
+    "mass": 15,
+    "success": 1.0,
+    "return": -0.5475823296792806
+  },
+  {
+    "label": "udr_0.5_8_canonical",
+    "mass": 0.5,
+    "success": 0.99,
+    "return": -0.5680135198379866
+  },
+  {
+    "label": "udr_0.5_8_canonical",
+    "mass": 1,
+    "success": 0.99,
+    "return": -0.5204237304534763
+  },
+  {
+    "label": "udr_0.5_8_canonical",
+    "mass": 2,
+    "success": 0.995,
+    "return": -0.4988429997372441
+  },
+  {
+    "label": "udr_0.5_8_canonical",
+    "mass": 3,
+    "success": 1.0,
+    "return": -0.4768138844915666
+  },
+  {
+    "label": "udr_0.5_8_canonical",
+    "mass": 4,
+    "success": 0.995,
+    "return": -0.5176491054543294
+  },
+  {
+    "label": "udr_0.5_8_canonical",
+    "mass": 5,
+    "success": 0.995,
+    "return": -0.5195540405134671
+  },
+  {
+    "label": "udr_0.5_8_canonical",
+    "mass": 6,
+    "success": 1.0,
+    "return": -0.5152938896743581
+  },
+  {
+    "label": "udr_0.5_8_canonical",
+    "mass": 8,
+    "success": 1.0,
+    "return": -0.5141952042561024
+  },
+  {
+    "label": "udr_0.5_8_canonical",
+    "mass": 10,
+    "success": 1.0,
+    "return": -0.538731164643541
+  },
+  {
+    "label": "udr_0.5_8_canonical",
+    "mass": 12,
+    "success": 1.0,
+    "return": -0.5498798346100375
+  },
+  {
+    "label": "udr_0.5_8_canonical",
+    "mass": 15,
+    "success": 0.995,
+    "return": -0.6087210989696905
+  }
+]

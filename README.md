@@ -1,71 +1,35 @@
-# Starting code for course project of FAIML - 01VSDWS
+# FAIML RL project — group 64
 
-Official assignment at [Google Doc](to update)
+Our code for the RL project: Hopper control in part 1, and the sim-to-real
+push task (panda-gym) with domain randomization in part 2.
 
-
-
-## Getting started
-
-Before starting to implement your own code, make sure to:
-1. read and study the material provided (see Section 1 of the assignment)
-2. read the documentation of the main packages you will be using ([Gymnasium](https://gymnasium.farama.org), [stable-baselines3](https://stable-baselines3.readthedocs.io/en/master/index.html))
-3. play around with the code in the template to familiarize with all the tools. Especially with the `test_random_policy.py` script.
-
-
-### 1. Local
-
-if you have a Linux system, you can work on the course project directly on your local machine. By doing so, you will also be able to render the Mujoco Hopper environment and visualize what is happening.
-We highly suggsest
-**Dependencies**
-- Run `pip install -r requirements.txt`
-
-Check your installation by launching `python test_random_policy.py`.
-
-
-### 2. Google Colab
-
-You can also run the code on [Google Colab](https://colab.research.google.com/)
-
-- Download all files contained in the `colab_template` folder in this repo (inside phase_1 folder).
-- Load the `test_random_policy.ipynb` file on [https://colab.research.google.com/](colab) and follow the instructions on it.
-
-NOTE 1: rendering is currently **not** officially supported on Colab, making it hard to see the simulator in action. We recommend that each group manages to play around with the visual interface of the simulator at least once, to best understand what is going on with the underlying Hopper environment.
-
-NOTE 2: you need to stay connected to the Google Colab interface at all times for your python scripts to keep training.
-
-## Project structure
+## Setup
 
 ```
-faiml_rl/
-├── readme.md
-├── phase1/
-│   ├── agent.py
-│   ├── requirements.txt
-│   ├── test_random_policy.py
-│   ├── train.py
-│   └── colab_template/
-│       └── test_random_policy.ipynb
-└── phase2/
-    ├── eval_sb3.py
-    ├── rand_wrapper.py -- randomization wrapper for UDR/ADR
-    ├── train_sb3.py
-    └── panda-gym/
-        ├── panda_gym/ (main package)
-        │   ├── __init__.py
-        │   ├── pybullet.py
-        │   ├── utils.py
-        │   ├── version.txt
-        │   ├── assets/
-        │   └── envs/
-        │       ├── core.py
-        │       ├── panda_tasks.py
-        │       ├── robots/
-        │       │   └── panda.py
-        │       └── tasks/
-        │           ├── flip.py
-        │           ├── pick_and_place.py
-        │           ├── push.py -- you will use this environment
-        │           ├── reach.py
-        │           ├── slide.py
-        │           └── stack.py
+pip install -r requirements.txt
 ```
+
+Quick check that things work: `python part1/test_random_policy.py`.
+
+Part 2 uses a local copy of panda-gym, install it from the folder:
+`pip install -e part2/panda-gym`.
+
+## What's where
+
+- `part1/` — REINFORCE, REINFORCE + baseline and actor-critic on Hopper.
+  Training in `train.py` and `train_ac.py`, testing in `test.py`.
+- `part2/` — PPO and SAC on the push task, with the UDR/ADR randomization
+  living in `rand_wrapper.py`. Training in `train_sb3.py`, eval in `eval_sb3.py`.
+- `report/` — LaTeX source and the compiled `main.pdf`.
+
+## Trainings, logs and model weights
+
+We ran a lot of trainings, so the heavy stuff stays outside the repo:
+
+- training curves on Weights & Biases: https://wandb.ai/s355100-politecnico-di-torino
+- full models, tensorboard logs and extra figures on Drive:
+  https://drive.google.com/drive/folders/1E1y1AwZ2oIPeDL7Y4RPE5VPml3dOItwC
+
+The small Hopper policies (`.pth`) are already in `part1/`. The final SAC models
+are in `part2/models/` — each one needs its `vecnormalize.pkl` next to it,
+otherwise evaluation gives wrong numbers.

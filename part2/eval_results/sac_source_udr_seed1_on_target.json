@@ -1,0 +1,7 @@
+{
+  "strategy": "udr",
+  "env_type": "source",
+  "eval_env": "target",
+  "success_rate": 1.0,
+  "mean_return": -0.46548830877523867
+}

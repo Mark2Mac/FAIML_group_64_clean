@@ -51,3 +51,11 @@ secrets/
 *.blg
 *.bbl
 part1/hopper_videos/hopper_video_maker.py
+
+# Deliverable: keep final part 2 SAC models + eval results in repo
+# (these override the *.zip and results/ rules above)
+!part2/models/
+!part2/models/*.zip
+!part2/models/*.pkl
+!part2/eval_results/
+!part2/eval_results/*.json
