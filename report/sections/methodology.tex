@@ -95,11 +95,9 @@ higher rewards while being much more unstable. All the thresholds were chosen em
 % high-performance runs. The 45,000-episode condition acted as a fallback that would have forced the LR decay initialisation,
 % again this threshold value was set based on previous runs, which showed that hopping usually emerged around 40k--45k episodes.
 
-The final Actor-Critic configuration employed a discount factor $\gamma = 0.99$,
-a GAE parameter $\lambda = 0.95$, a learned action variance, and a minimum variance threshold (sigma floor = 0.1).
-Training was performed for 70,000 episodes in order to allow the policy sufficient time to discover and
-refine locomotion behaviours. The learning-rate decay thresholds and all other hyperparameters were selected empirically
-based on preliminary training runs and were the ones that best balanced exploration, learning stability, and long-term performance.
+The final Actor-Critic configuration used the hyperparameters reported in Table~\ref{tab:ac_configuration}.
+All values were selected empirically from previous preliminary training runs, choosing the ones that best
+balanced exploration, learning stability and long-term performance across.
 
 
 \begin{table}[h]
