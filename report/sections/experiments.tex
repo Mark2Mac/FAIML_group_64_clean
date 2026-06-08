@@ -2,7 +2,17 @@
 
 \subsection{Part 1 Results: Hopper Continuous Control}
 
-All three algorithms were trained for 70{,}000 episodes on the Hopper-v4 environment, repeated across three independent seeds. Table~\ref{tab:part1_results} summarises the training performance; Figure~\ref{fig:experiments_reward} shows the learning curves (rolling average over 100 episodes $\pm$ standard deviation across seeds). In the table, \emph{Best Avg-100} is the peak value of the 100-episode rolling mean (averaged over seeds); \emph{Final Avg-100} is the mean return over the last 100 training episodes; \emph{Std} is the standard deviation computed over all 70{,}000 episodes across all seeds; \emph{Best Episode} is the highest single-episode return observed per seed, averaged across seeds; \emph{Avg Ep.\ Len} is the mean episode length over the full 70{,}000 training episodes across all seeds; \emph{Time (min)} is the total time required to train the agent.
+All three algorithms were trained for 70{,}000 episodes on the Hopper-v4 environment, repeated across three independent seeds.
+Table~\ref{tab:part1_results} summarises the training performance;
+Figure~\ref{fig:experiments_reward} shows the learning curves (rolling average over 100 episodes $\pm$ standard deviation across seeds).
+
+In the table, \emph{Best Avg-100} is the peak value of the 100-episode rolling mean (averaged over seeds);
+\emph{Final Avg-100} is the mean return over the last 100 training episodes; \emph{Std} is the standard deviation computed over all 70{,}000 episodes across all seeds;
+\emph{Best Episode} is the highest single-episode return observed per seed, averaged across seeds;
+\emph{Avg Ep.\ Len} is the mean episode length over the full 70{,}000 training episodes across all seeds;
+\emph{Time (min)} is the total time required to train the agent.
+
+
 
 \begin{table}[ht]
 \centering
@@ -55,32 +65,25 @@ Actor-Critic         & 1 & $1725 \pm 1382$ & $555 \pm 432$ \\
     \label{fig:experiments_reward}
 \end{figure}
 
-We ran the Actor-Critic for 70{,}000 training episodes and it successfully learned a locomotion policy for the Hopper environment.
-As we can see from the graph X (there should be the graph number), training can be divided into four distinct phases.
+As we can clearly see from Table~\ref{tab:part1_results}, the Actor-Critic achieved the best overall training performance, outperforming the other models 
+in terms of highest Best Avg-100 reward (1938), highest Final Avg-100 reward (1360), highest Best Episode reward (3480) and longest average episode length (249 steps).
+In turn, REINFORCE with baseline achieved better overall scores than vanilla REINFORCE, improving the Best Avg-100 reward from 1006 to 1807 and the average
+episode length from 178 to 215 steps.
+Interestingly, despite expecting a gradient-estimator variance reduction with the introduction of a baseline, the opposite behaviour was recorded,
+where REINFORCE with baseline exhibited a higher reward standard deviation (399 vs 257) than vanilla REINFORCE.
 
-During the first phase (0--40k episodes), the agent learned balancing and standing behaviors, but not forward locomotion yet.
-Therefore, average rewards remained relatively low and episode lengths were short.
+Figure~\ref{fig:experiments_reward} shows that the Hopper improved its policy throughout training under all algorithms.
+However, the Actor-Critic achieved faster policy improvement, reaching larger reward quicker and eventually reaching reward scores that neither of the REINFORCE
+variants were able to obtain.
 
-Between 40k and 60k episodes, a steep increase in both reward and episode length occurred, suggesting that forward locomotion was discovered.
+The test results reported in Table~\ref{tab:part1_test_results} support the claim that the Actor-Critic outperformed the other approaches, although substantial variability
+across seeds was recorded.
+Indeed, the best Actor-Critic seed achieved a mean test return of $3335 \pm 14$ and consistently survived for the full episode ($1000 \pm 0$ steps).
+On the other hand, the worst seed achieved a mere $760 \pm 111$ reward score, proving that Actor-Critic did not perform consistenlty across different seeds.
+Lower scores but similar variability was observed for both REINFORCE variants.
 
-Then, from 60k to 80k episodes, performance continued to improve as the policy refined its locomotion strategy.
-
-Finally, during the 80k--120k interval, training entered a high-performance plateau without managing to converge in a stable way.
-Average rewards exceeded 2000 and several individual episodes achieved rewards over 3000. Nevertheless, a noticeable amount of variability still persisted
-in the later training stages, alternating both extremely high and low performing episodes proving that the learned behavior was able to achieve high score
-but not consistently.
-
-During the whole training phase, both the learned policy standard deviation and entropy decreased throughout training
-(metto grafico anche di questi? Troppo? Io metterei uno dei due), showing a smooth transition from an exploratory to a more deterministic policy as it gained confidence.
-
-The critic loss, however, present several large spikes, particularly during periods of rapid policy improvement. This is due to the fact that the critic
-struggles to adapt its value estimates to the rapidly evolving policy. On the contrary, the actor loss remains stably bounded and centered around zero thanks
-to advantage normalization.
-
-Although convergence and behavior reproducibility was not fully achieved, the agent consistently maintained high reward levels throughout the final stages of training.
-
-
-
+Overall, the Actor-Critic performed the best both in training and testing among the evaluated methods.
+Nevertheless, the large differences between seeds indicate that learning remained sensitive to initialization and stochastic training effects.
 
 
 
