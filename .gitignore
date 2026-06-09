@@ -59,3 +59,9 @@ part1/hopper_videos/hopper_video_maker.py
 !part2/models/*.pkl
 !part2/eval_results/
 !part2/eval_results/*.json
+
+# Deliverable: keep the README demo GIFs + social preview (override *.gif above)
+!assets/
+!assets/sac_push.gif
+!assets/hopper.gif
+!assets/social_preview.png

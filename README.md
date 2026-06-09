@@ -1,7 +1,28 @@
+<div align="center">
+
 # FAIML RL project — group 64
 
-Our code for the RL project: Hopper control in part 1, and the sim-to-real
-push task (panda-gym) with domain randomization in part 2.
+**Reinforcement Learning for sim-to-real robot control** — policy gradient methods on
+*Hopper* (part 1) and the *PandaPush* sim-to-sim task with domain randomization (part 2).
+
+![Python](https://img.shields.io/badge/Python-3.10-3776AB?logo=python&logoColor=white)
+![Stable-Baselines3](https://img.shields.io/badge/Stable--Baselines3-PPO%20%7C%20SAC-2C8C3C)
+![Weights & Biases](https://img.shields.io/badge/W%26B-experiment%20tracking-FFBE00?logo=weightsandbiases&logoColor=black)
+![MuJoCo · panda-gym](https://img.shields.io/badge/envs-MuJoCo%20%C2%B7%20panda--gym-555)
+
+<table>
+<tr>
+<td align="center"><img src="assets/hopper.gif" alt="Hopper Actor-Critic" width="360"/><br><sub><b>Part 1</b> — Hopper · Actor-Critic</sub></td>
+<td align="center"><img src="assets/sac_push.gif" alt="SAC PandaPush" width="360"/><br><sub><b>Part 2</b> — PandaPush · SAC (100% success)</sub></td>
+</tr>
+</table>
+
+</div>
+
+---
+
+Our code for the RL project: Hopper control in part 1, and the sim-to-real push task
+(panda-gym) with domain randomization in part 2.
 
 ## Setup
 
@@ -17,19 +38,93 @@ Part 2 uses a local copy of panda-gym, install it from the folder:
 ## What's where
 
 - `part1/` — REINFORCE, REINFORCE + baseline and actor-critic on Hopper.
-  Training in `train.py` and `train_ac.py`, testing in `test.py`.
-- `part2/` — PPO and SAC on the push task, with the UDR/ADR randomization
-  living in `rand_wrapper.py`. Training in `train_sb3.py`, eval in `eval_sb3.py`.
+  Training in `train.py` and `train_ac.py`, testing in `test.py`, rollout-to-GIF in `render_gif.py`.
+- `part2/` — PPO and SAC on the push task, with the UDR/ADR randomization living in
+  `rand_wrapper.py`. Training in `train_sb3.py`, eval in `eval_sb3.py`, rollout-to-GIF in `render_gif.py`.
 - `report/` — LaTeX source and the compiled `main.pdf`.
+
+## Results at a glance
+
+**Part 1 — Hopper** (test return over 150 deterministic episodes, 3 seeds)
+
+| Algorithm | Test return (mean ± std) | Note |
+|---|---|---|
+| REINFORCE (b = 0) | 1097.8 ± 722.0 | unbiased, high variance — stumbles into a jumping gait |
+| REINFORCE (b = 20) | 1060.1 ± 829.6 | constant baseline ≈ 3% of return → negligible effect |
+| Actor-Critic | 939.7 ± 184.1 | far more stable, but collapses late into a "stand still" optimum |
+
+The Actor-Critic collapse (advantage variance → 0 under normalization) and REINFORCE's
+variance are exactly what motivate the trust-region / entropy methods of part 2 (PPO, SAC).
+
+**Part 2 — PandaPush, SAC** (target domain, 3 seeds)
+
+| Train → Test | Success rate | Mean return |
+|---|---|---|
+| source → target — none *(lower bound)* | 0.98 | −0.63 |
+| target → target — none *(upper bound)* | 1.00 | −0.44 |
+| source → target — UDR | 1.00 | −0.51 |
+| source → target — ADR | 0.99 | −0.56 |
+
+SAC already transfers well with no randomization (the mass gap is small); UDR/ADR mostly
+improve the *return* (efficiency), closing the gap toward the upper bound.
 
 ## Trainings, logs and model weights
 
-We ran a lot of trainings, so the heavy stuff stays outside the repo:
+We ran a lot of trainings, so the heavy stuff stays outside the repo.
 
-- training curves on Weights & Biases: https://wandb.ai/s355100-politecnico-di-torino
-- full models, tensorboard logs and extra figures on Drive:
-  https://drive.google.com/drive/folders/1E1y1AwZ2oIPeDL7Y4RPE5VPml3dOItwC
+> **Note on the Drive folder:** it holds the **part 2** material only — the SAC / UDR / ADR
+> models, their `VecNormalize` states, TensorBoard logs and the hyperparameter-sweep outputs.
+> The **part 1** Hopper policies (`.pth`) are small and live directly in `part1/`.
 
-The small Hopper policies (`.pth`) are already in `part1/`. The final SAC models
-are in `part2/models/` — each one needs its `vecnormalize.pkl` next to it,
-otherwise evaluation gives wrong numbers.
+| Resource | Link |
+|---|---|
+| Drive — part 2 SAC/UDR/ADR models, TB logs, sweep figures | https://drive.google.com/drive/folders/1E1y1AwZ2oIPeDL7Y4RPE5VPml3dOItwC |
+| W&B — Part 1 (REINFORCE / Actor-Critic, Hopper) | https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1 |
+| W&B — Part 2 (SAC + UDR/ADR, PandaPush) | https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2 |
+| W&B — PPO baseline (step-budget scaling) | https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-ppo |
+| W&B — SAC hyperparameter sweep (Bayesian) | https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-sweep |
+| W&B — PPO hyperparameter sweep | https://wandb.ai/s355100-politecnico-di-torino/ppo_sweep_3 |
+
+The small Hopper policies (`.pth`) are already in `part1/`. The final SAC models are in
+`part2/models/` — each one needs its `vecnormalize.pkl` next to it, otherwise evaluation
+gives wrong numbers.
+
+<details>
+<summary><b>Direct links to the individual W&B runs</b></summary>
+
+**Part 1 — Hopper** (`faiml-group64-part1`)
+
+| Algorithm | Seed 1 | Seed 2 | Seed 3 |
+|---|---|---|---|
+| Actor-Critic | [y68n4nfo](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/y68n4nfo) | [kxbi33wh](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/kxbi33wh) | [hhh9fd4z](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/hhh9fd4z) |
+| REINFORCE (no baseline) | [sk8vp85i](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/sk8vp85i) | [v2muabmd](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/v2muabmd) | [6wyyjiqd](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/6wyyjiqd) |
+| REINFORCE (baseline b=20) | [i0tbi8jv](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/i0tbi8jv) | [oyqmwair](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/oyqmwair) | [sfhrnpul](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/sfhrnpul) |
+
+**Part 2 — PandaPush SAC** (`faiml-group64-part2`)
+
+| Configuration | Seed 0 | Seed 1 | Seed 2 |
+|---|---|---|---|
+| SAC source → (none) | [vdmjqipe](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2/runs/vdmjqipe) | [d4hyux9z](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2/runs/d4hyux9z) | [1e2eg1la](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2/runs/1e2eg1la) |
+| SAC target → (none) *(upper bound)* | [q9fcvhpm](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2/runs/q9fcvhpm) | [lxswswst](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2/runs/lxswswst) | [nrftfkpl](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2/runs/nrftfkpl) |
+| SAC source → UDR | [iuy3hbmi](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2/runs/iuy3hbmi) | [7kriq3io](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2/runs/7kriq3io) | [kk6ghj2g](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2/runs/kk6ghj2g) |
+| SAC source → ADR | [6iu2ni9e](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2/runs/6iu2ni9e) | [egrw9a56](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2/runs/egrw9a56) | [4tmaeg79](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2/runs/4tmaeg79) |
+
+</details>
+
+## Rendering a rollout
+
+```
+# Part 1 — Hopper
+cd part1
+python render_gif.py --model models_ac_70k_filippo_2026-06-07/policy_ac_70k_filippo_2026-06-07_run_1_best.pth \
+    --episodes 3 --out ../assets/hopper.gif
+
+# Part 2 — PandaPush
+cd part2
+python render_gif.py --model models/sac_target_none_seed2.zip --algo sac \
+    --env-type target --episodes 6 --out ../assets/sac_push.gif
+```
+
+<sub>Environment renders use <a href="https://github.com/qgallouedec/panda-gym">panda-gym</a>
+(MIT © 2020 Quentin Gallouédec) and Gymnasium MuJoCo. Result figures under
+<code>part1/figures/</code> and <code>part2/figures/</code> are our own.</sub>
