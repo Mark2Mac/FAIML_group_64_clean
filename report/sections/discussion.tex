@@ -79,7 +79,7 @@ reality gap for an off-policy learner with a replay buffer.
 Success rate is already saturated, so UDR and ADR mainly improve the mean return (UDR $-0.509$ vs.\ the $-0.633$ lower
 bound, closing $\sim\!66\%$ of the gap toward the $-0.445$ upper bound).
 The mass-sensitivity sweep (Fig.~\ref{fig:sensitivity}) confirms this:
-\textbf{the non-randomized policy already generalises across a wide range of cube masses, leaving limited headroom for randomization}.
+the non-randomized policy already generalises across a wide range of cube masses, leaving limited headroom for randomization.
 This is the main limitation of the simplified sim-to-sim setting: when the source learner is strong,
 domain randomization adds a robustness margin rather than rescuing a failing policy.
 UDR can also fall into a conservativism trap when its range is too wide.
