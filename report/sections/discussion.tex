@@ -26,38 +26,49 @@ achieved is real but limited.
 
 While a constant baseline ($b=20$) reduced variance and improved performance over vanilla REINFORCE, it applies a global correction that is identical across all states. Actor-Critic further improved stability by using a state-dependent baseline $V(s)$, which adapts to the local structure of the value function, providing a much more effective variance reduction at each step.
 
-The results obtained in the first part demonstrate that the proposed Actor-Critic framework successfully learned a locomotion policy for the Hopper environment.
-Nevertheless, training did not fully converge to a stable hopping policy: significant reward variance remained throughout the final stages of training, 
-indicating that the learned policy was still too exploratory and stochastic, causing it to be unable to reproduce its best behaviors consistently.
 
-This result represents a substantial improvement compared to earlier Actor-Critic implementations tested during development.
-Preliminary versions frequently converged to a "lazy" policy in which the Hopper stood still, which can mathematically occur
-due to the Hopper maximizing only the survival component of the reward function.
+
+The results obtained in the first part demonstrate that the proposed Actor-Critic framework successfully learned a locomotion policy for the Hopper environment.
+Nevertheless, training did not fully converge to stable hopping: significant reward variance remained throughout the final stages of training, 
+indicating still high exploration and stochasticity, preventing the Hoppper to reproduce its best behaviors consistently.
+
+This result represents a substantial improvement compared to embryonic versions of Actor-Critic implementations, as they 
+converged to a "lazy" standing-still policy. This can mathematically occur due to an agent maximizing only the survival component of the reward function.
+
+% Standing actions were continuously selected as they tended to achieve high positive advantages, while jumping actions
+% consistently turned out to be worse than the critic’s expectations.
+% This occurred due to the initial usage of the TD(0) target, in which only the immediate subsequent
+% state was considered, so jumping actions always led to immediate worse states, making them less appealing to a
+% short-sighted critic and discouraging their exploration.
+% Therefore, the short-sighted critic reinforced actions that led to immediate better states: standing,
+% which continued to return a positive reward thanks to the survival component of the reward function, forcing the
+% Hopper to adopt a reward-exploiting local optimum behavior.
 
 Standing actions were continuously selected as they tended to achieve high positive advantages, while jumping actions
-consistently turned out to be worse than the critic’s expectations.
-This occurred due to the initial usage of the TD(0) target, in which only the immediate subsequent
-state was considered, so jumping actions always led to immediate worse states, making them less appealing to a
-short-sighted critic and discouraging their exploration.
-Therefore, the short-sighted critic reinforced actions that led to immediate better states: standing,
-which continued to return a positive reward thanks to the survival component of the reward function, forcing the
-Hopper to adopt a reward-exploiting local optimum behavior.
+consistently turned out to be worse than the critic’s expectations. Because the initial TD(0) target only considered
+the immediate next state, jumping appeared less rewarding and was therefore discouraged. As a result, the critic
+reinforced standing behaviors, causing the Hopper to converge to a reward-exploiting local optimum based on the
+survival component of the reward function.
 
-The introduction of GAE, a sigma floor together with advantage normalization, a learned exploration variance, a triggered learning-rate decay mechanism
-significantly improved exploration and enabled the policy to free itself from the local optimum, eventually discovering hopping.
+
+The introduction of GAE, a sigma floor together with all the previously cited modifications, improved exploration and enabled
+the policy to eventually discover hopping.
 
 The final model's behavioral instability seems to be supported by the critic-loss spikes, which, however, 
 should not necessarily be interpreted as training failure.
-These spikes are not necessarily indicative of unstable training as reinforcement-learning targets
-continuously change together with the current policy, therefore when the actor discovers substantially better trajectories,
-previously learned value estimates become obsolete and inaccurate, generating large temporal-difference errors and
-consequently large critic-loss spikes.
+% These spikes are not necessarily indicative of unstable training as reinforcement-learning targets
+% continuously change together with the current policy, therefore when the actor discovers substantially better trajectories,
+% previously learned value estimates become obsolete and inaccurate, generating large temporal-difference errors and
+% consequently large critic-loss spikes.
+These spikes are not necessarily indicative of unstable training, since reinforcement-learning targets evolve together
+with the policy. Therefore, when the actor discovers better trajectories, previously learned value estimates become inaccurate,
+generating large temporal-difference errors and consequently critic-loss spikes.
 
 In contrast, actor updates remained remarkably stable throughout training, as advantage normalization successfully bounded
-policy updates and prevented gradient explosions despite the highly non-stationary learning process.
+policy updates and prevented gradient explosions.
 
-Despite these improvements, the final policy still exhibits substantial variability and has not fully converged. Future work
-could investigate additional stabilization techniques like TRPO or PPO which exploits trust region and clipped policy
+Despite these improvements, the final policy still exhibits variability and has not fully converged. Future work
+could investigate additional stabilization techniques like TRPO or PPO which exploit trust region and clipped policy
 updates \cite{SchulmanTRPO2015,SchulmanPPO2017}.
 
 Furthermore, more advanced actor-critic methods for continuous control, such as DDPG and TD3, could be explored,
