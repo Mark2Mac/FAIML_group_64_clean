@@ -38,9 +38,8 @@ deviation of a Gaussian action distribution:
 a_t \sim \mathcal N(\mu_\theta(s_t), \sigma_\theta(s_t)),
 \]
 
-where both parameters are learned by the policy network. During training, actions are sampled from the
-distribution to encourage exploration, while during evaluation the policy becomes deterministic by
-using mean actions $\mu_\theta(s_t)$.
+where both parameters are learned by the policy network. Actions are sampled during training to encourage exploration,
+while the mean action $\mu_\theta(s_t)$ is used during evaluation.
 
 To improve the quality of the policy updates, Generalized Advantage Estimation (GAE)
 was implemented. (Schulman et al., 2015) Therefore, advantages are computed as:
@@ -57,18 +56,16 @@ where
 
 is the temporal-difference error.
 
-In this way, GAE provides a compromise between using a low-variance TD(0)
-estimate and a high variance Monte Carlo approach that considers the episode full return.
 
 Subsequently, advantages were normalized before policy updates in order to stabilize gradients,
 improve critic's estimates and reduce training instability. A minimum standard deviation (sigma floor)
-was enforced to prevent premature collapse of exploration and continue promoting exploration even in later stages.
-Additionally, a triggered learning-rate decay mechanism was introduced during later stages of training with the aim
-of stabilizing training by reducing update magnitude after the policy had discovered effective locomotion behaviors.
+was enforced to prevent premature collapse of exploration and promoting it even in later stages.
+Additionally, a triggered learning-rate decay mechanism was introduced during later stages of training to reduce
+update magnitude after the policy had discovered effective locomotion behaviors.
 
 
-More specifically, the decay was activated only once one of the trigger conditions reported in Table~\ref{tab:lr_decay} was satisfied, which
-caused the learning rate to linearly reduce from $3 \times 10^{-4}$ to $10^{-5}$ until the end of training.
+More specifically, the decay was activated only once one of the trigger conditions reported in Table~\ref{tab:lr_decay} was satisfied,
+causing the learning rate to linearly reduce from $3 \times 10^{-4}$ to $10^{-5}$ until the end of training.
 
 \begin{table}[ht]
 \centering
@@ -88,7 +85,7 @@ Minimum learning rate & $10^{-5}$ \\
 \end{table}
 
 The goal was to reduce update magnitude once the Hopper had likely discovered jumping, as this behaviour leads to
-higher rewards while being much more unstable. All the thresholds were chosen empirically.
+higher rewards while being much more unstable. All thresholds were chosen empirically.
 
 % high average reward together
 % with long episode length meant sustained hopping was disovered, and also best\_avg\_reward $\geq$ 1500 indicated clear
@@ -96,8 +93,7 @@ higher rewards while being much more unstable. All the thresholds were chosen em
 % again this threshold value was set based on previous runs, which showed that hopping usually emerged around 40k--45k episodes.
 
 The final Actor-Critic configuration used the hyperparameters reported in Table~\ref{tab:ac_configuration}.
-All values were selected empirically from previous preliminary training runs, choosing the ones that best
-balanced exploration, learning stability and long-term performance across.
+All values were selected empirically from previous preliminary training runs.
 
 
 \begin{table}[h]
@@ -125,13 +121,9 @@ Optimizer & Adam \\
 \end{table}
 
 
-All these modifications were designed to improve training stability, maintain sufficient exploration, and allow longer
-training horizons without facing policy collapses.
 
-Performance was evaluated using numerous training diagnostics, such as episodic reward, rolling average reward over the
-last 100 episodes, episode length, policy entropy, learned action standard deviation, actor loss and critic loss.
-During the training phase all the mentioned evaluation metrics were monitored to supervise the learning progress,
-exploration behaviour, value-function stability, and policy convergence.
+Performance was evaluated using episodic reward, rolling average reward (100-episode window),
+episode length, policy entropy, learned action standard deviation, actor loss and critic loss.
 
 
 
