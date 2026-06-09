@@ -1,0 +1,18 @@
+\begin{abstract}
+This project investigates reinforcement learning for continuous robotic 
+control and sim-to-real transfer in a sim-to-sim setting. The work is 
+divided into two complementary parts: in the first, policy-gradient methods 
+including REINFORCE, REINFORCE with baseline, and Actor-Critic are implemented 
+and evaluated on the Hopper continuous-control environment, with improvements 
+including Generalized Advantage Estimation, advantage normalization, a learned 
+exploration variance with a sigma floor, and a triggered learning-rate decay 
+mechanism, the resulting Actor-Critic agent achieved average rewards around 
+2000 and individual episodes exceeding 3000, while the baseline variant reached 
+a peak test reward of 2444 compared to 1305 for vanilla REINFORCE. In the 
+second part, sim-to-sim transfer is investigated on the PandaPush environment 
+using PPO, SAC, UDR, and ADR: SAC outperformed PPO, and UDR achieved the best 
+transfer performance, reducing the sim-to-real gap by approximately 66\% 
+relative to vanilla SAC. These results confirm the effectiveness of modern 
+actor-critic methods for continuous control and show that domain randomization 
+can substantially improve robustness under dynamics uncertainty.
+\end{abstract}

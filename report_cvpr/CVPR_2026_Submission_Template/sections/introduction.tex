@@ -1,0 +1,22 @@
+\section{Introduction}
+
+Reinforcement Learning (RL) is becoming one of the most popular and successful approaches for solving continuous control
+problems, especially in robotics \cite{Kober2013}.
+Indeed, this setting introduces several challenges such as delayed rewards, exploration-exploitation trade-offs,
+high-dimensional continuous action spaces and potentially unstable training dynamics.
+
+Another major challenge this paper tackles is sim-to-real transfer. Policies are commonly trained in simulation, where data
+collection is cheap and safe, and then applied to environments whose dynamics differ from those seen during training.
+This discrepancy represents the reality gap and it can significantly degrade performance \cite{Tobin2017}.
+In the second half of the project, the reality gap is represented through a variation in the mass of a manipulated object:
+from a source environment with a 1 kg cube to a target environment with a 5 kg cube.
+
+The project is divided into two complementary parts. In the first part, we implement and analyze policy-gradient methods on
+the Hopper continuous-control environment, observing learning dynamics, exploration behavior, critic stability, and overall
+training performance \cite{Brockman2016, Todorov2012}. Specifically, we implement REINFORCE \cite{Williams1992} with and without a constant baseline, and a one-step Actor-Critic architecture
+augmented with Generalized Advantage Estimation, evaluating the impact of variance reduction techniques on learning stability and convergence.
+
+In the second part, we investigate sim-to-real transfer on the PandaPush environment \cite{gallouedec2021pandagym}, first evaluating an on-policy approach with Proximal Policy Optimization (PPO) \cite{SchulmanPPO2017}
+against Soft Actor-Critic (SAC) \cite{SAC2018}, an off-policy method, together with Uniform Domain Randomization (UDR) and Automatic Domain Randomization (ADR) \cite{rubikADR2019}
+strategies to address the reality gap.
+
