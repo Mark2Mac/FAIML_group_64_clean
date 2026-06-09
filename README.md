@@ -45,13 +45,13 @@ Part 2 uses a local copy of panda-gym, install it from the folder:
 
 ## Results at a glance
 
-**Part 1 — Hopper** (test return over 150 deterministic episodes, 3 seeds)
+**Part 1 — Hopper** (best 100-episode training return, mean over 3 seeds)
 
-| Algorithm | Test return (mean ± std) | Note |
+| Algorithm | Best avg-100 return | Note |
 |---|---|---|
-| REINFORCE (b = 0) | 1097.8 ± 722.0 | unbiased, high variance — stumbles into a jumping gait |
-| REINFORCE (b = 20) | 1060.1 ± 829.6 | constant baseline ≈ 3% of return → negligible effect |
-| Actor-Critic | 939.7 ± 184.1 | far more stable, but collapses late into a "stand still" optimum |
+| REINFORCE (b = 0) | 1006 | unbiased but high-variance Monte Carlo returns |
+| REINFORCE (b = 20) | 1807 | constant baseline gives only limited variance reduction |
+| Actor-Critic | **1938** | strongest performer; high inter-seed variance and a late collapse |
 
 The Actor-Critic collapse (advantage variance → 0 under normalization) and REINFORCE's
 variance are exactly what motivate the trust-region / entropy methods of part 2 (PPO, SAC).
