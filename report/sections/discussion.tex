@@ -71,6 +71,20 @@ Despite these improvements, the final policy still exhibits variability and has 
 could investigate additional stabilization techniques like TRPO or PPO \cite{SchulmanTRPO2015,SchulmanPPO2017} and
 more advanced actor-critic methods for continuous control, such as DDPG and TD3 \cite{Fujimoto2018}.
 
+\subsection{Domain randomization on PandaPush}
+SAC solves the push task almost converging on the source ($98.5\%$), and even the naive
+source$\to$target transfer keeps a $97.5\%$ success rate, only marginally below the
+target$\to$target upper bound: the injected mass shift ($1\!\to\!5$ kg) is a \emph{small}
+reality gap for an off-policy learner with a replay buffer.
+Success rate is already saturated, so UDR and ADR mainly improve the mean return (UDR $-0.509$ vs.\ the $-0.633$ lower
+bound, closing $\sim\!66\%$ of the gap toward the $-0.445$ upper bound).
+The mass-sensitivity sweep (Fig.~\ref{fig:sensitivity}) confirms this:
+{the non-randomized policy already generalises across a wide range of cube masses, leaving limited headroom for randomization}.
+This is the main limitation of the simplified sim-to-sim setting: when the source learner is strong,
+domain randomization adds a robustness margin rather than rescuing a failing policy.
+UDR can also fall into a conservativism trap when its range is too wide.
+On the other hand ADR removes the manual range at the cost of extra sampling-schedule hyperparameters (boundary thresholds and step size).
+
 
 \begin{figure}[htbp]
     \centering

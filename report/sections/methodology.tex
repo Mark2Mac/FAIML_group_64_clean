@@ -151,8 +151,8 @@ episode length, policy entropy, learned action standard deviation, actor loss an
 \subsection{Part 2: PandaPush, PPO, SAC and Domain Randomization}
 
 Part 2 investigates sim-to-real transfer using the PandaPush-v3 robotic manipulation environment. The task consists of controlling a Franka Panda robotic arm to push a cube toward a desired target position.
-To move the arm, the chosen algorithm has control over the 7 joints of the robot, with the reward depending only on end-effector movements.
-Therefore, the agent must learn to coordinate joint movements in order to move the cube through the arm's end-effector and achieve task success.
+To move the arm, the agent commands 3D Cartesian displacements of the end-effector (the seven joint angles are resolved by inverse kinematics), while the reward depends on the cube--goal distance.
+Therefore, the agent must learn to position the end-effector so as to push the cube toward the target and achieve task success.
 The observation space contains the robot state, cube state, and target position information. Actions are continuous Cartesian end-effector displacements, defined as:
 \[
 a_t=[dx,dy,dz].
@@ -188,13 +188,24 @@ Soft Actor-Critic (SAC) is an off-policy actor-critic method that maximizes both
 J = \mathbb E[R] + \alpha H(\pi).
 \]
 SAC combines a replay buffer, twin critics to reduce value overestimation, and automatic entropy tuning. These characteristics generally provide better exploration and sample efficiency than PPO, especially in continuous-control robotic tasks.
-To improve transfer across different dynamics, Domain Randomization (DR) was applied by varying the cube mass during training. \textbf{SAC explaination should be expanded, also maybe add some equations for the loss functions and the automatic entropy tuning mechanism.}
+Concretely, the twin critics minimise the soft Bellman residual
+\[
+J_Q(\theta)=\mathbb{E}\big[(Q_\theta(s_t,a_t)-(r_t+\gamma\,\mathbb{E}_{s_{t+1}}[V_{\bar\theta}(s_{t+1})]))^2\big],
+\]
+with $V(s)=\mathbb{E}_{a\sim\pi}[\min_i Q_i(s,a)-\alpha\log\pi(a|s)]$; the actor minimises
+$J_\pi(\phi)=\mathbb{E}[\alpha\log\pi_\phi(a|s)-Q_\theta(s,a)]$, and the temperature $\alpha$ is
+tuned automatically by minimising $J(\alpha)=\mathbb{E}[-\alpha(\log\pi(a|s)+\bar{\mathcal{H}})]$
+against a target entropy $\bar{\mathcal{H}}=-\dim(\mathcal{A})$.
+
+To improve transfer across different dynamics, Domain Randomization (DR) was applied by varying the cube mass during training.
 
 Three configurations were evaluated:
 \begin{itemize}
     \item No DR: fixed source mass $m=1$ kg.
-    \item Uniform Domain Randomization (UDR): $m \sim U(0.5,8.0)$ with a new mass sampled at every episode. \textbf{Marco should take a better look at the range to write here}
-    \item Automatic Domain Randomization (ADR): an adaptive curriculum that expands or contracts the sampling range according to agent performance.
+    \item Uniform Domain Randomization (UDR): $m \sim U(0.5,8.0)$ kg, resampled at every episode reset; the range brackets both the source nominal ($1$ kg) and the target ($5$ kg) without being centered on the (assumed unknown) target mass.
+    \item Automatic Domain Randomization (ADR): an AutoDR-style curriculum over the support $[0.5,8.0]$ kg. It starts from a narrow interval $\phi=[1.0-h,\,1.0+h]$, with $h=\min(0.1,\,0.25\,\Delta_{\text{range}})$,
+    around the nominal mass and adapts the two boundaries online: at each reset the mass is sampled on a boundary with probability $0.5$ and uniformly in the interior otherwise.
+    The mean of the last $20$ returns at each boundary is compared to a running baseline $b$ (mean of the last $50$ episode returns): a boundary is pushed outward by $\Delta=0.1$ kg when performance stays within $20\%$ of $b$, and pulled inward by $\Delta$ when it falls below $50\%$, keeping a minimum gap of $0.05$ kg.
 \end{itemize}
 
 The target environment uses a cube mass of 5 kg. However, the randomization range was chosen to be broad enough to include both source and target conditions without being narrowly centered around the target mass, avoiding information leakage from the evaluation environment.
@@ -204,4 +215,4 @@ Both algorithms were implemented using the Stable Baselines3 library \cite{stabl
 The final hyperparameters were chosen based on best average reward and success rate across more than 30 training runs for each algorithm, with the best-performing configuration selected for the final evaluation phase.
 
 After training, both PPO and SAC were evaluated on the target environment and compared, aiming to choose the best-performig algorithm as the base on which to apply domain randomization.
-\textbf{Marco should finish the paragraph by explaining evaluation method and methodology for application on domain randomization}
+The selected algorithm (SAC) was then trained on the source domain under each strategy (none, UDR, ADR) and evaluated deterministically on both the source and target domains over $50$ episodes per seed ($3$ seeds), reporting mean success rate and mean return. The \texttt{none} source$\to$target configuration provides the lower bound and the target$\to$target oracle the upper bound, so UDR and ADR are assessed by how much of that gap they close on the target domain.

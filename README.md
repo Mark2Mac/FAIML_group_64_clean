@@ -111,6 +111,64 @@ gives wrong numbers.
 
 </details>
 
+## Results gallery
+
+Full set of plots produced during the project (beyond the few that fit in the 5-page report).
+Interactive versions of the curves and sweeps are on the linked W&B projects.
+
+<details>
+<summary><b>Part 1 — Hopper (REINFORCE &amp; Actor-Critic)</b></summary>
+<br>
+<table>
+<tr>
+<td align="center"><img src="part1/figures/learning_curves.png" width="380"/><br><sub>Learning curves — return (100-ep rolling avg) ± std, 3 seeds</sub></td>
+<td align="center"><img src="part1/figures/experiments_reward.png" width="380"/><br><sub>Average training return across seeds</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="part1/figures/losses.png" width="380"/><br><sub>Actor and critic losses (Actor-Critic)</sub></td>
+<td align="center"><img src="part1/figures/episode_lengths.png" width="380"/><br><sub>Episode length over training</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="part1/figures/test_returns_boxplot.png" width="380"/><br><sub>Test-return distribution per algorithm</sub></td>
+<td align="center"><img src="part1/figures/training_time_bar.png" width="380"/><br><sub>Wall-clock training time per algorithm</sub></td>
+</tr>
+</table>
+</details>
+
+<details>
+<summary><b>Part 2 — PandaPush: transfer &amp; mass sensitivity</b></summary>
+<br>
+<table>
+<tr>
+<td align="center"><img src="part2/figures/eval_mean_return.png" width="380"/><br><sub>Mean return across training strategies</sub></td>
+<td align="center"><img src="part2/figures/eval_success_rate.png" width="380"/><br><sub>Success rate across training strategies</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="part2/figures/sensitivity_return.png" width="380"/><br><sub>Return vs cube mass</sub></td>
+<td align="center"><img src="part2/figures/sensitivity_success.png" width="380"/><br><sub>Success rate vs cube mass</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="part2/figures/udr_ranges_return.png" width="380"/><br><sub>Return for different UDR mass ranges</sub></td>
+<td align="center"><img src="part2/figures/udr_range_sensitivity.png" width="380"/><br><sub>Sensitivity to the UDR range</sub></td>
+</tr>
+</table>
+</details>
+
+<details>
+<summary><b>Hyperparameter sweeps (Bayesian &amp; OFAT)</b></summary>
+<br>
+<table>
+<tr>
+<td align="center"><img src="part2/figures/sweep_bayes_lr.png" width="380"/><br><sub>Bayesian sweep — return vs learning rate</sub></td>
+<td align="center"><img src="part2/figures/sweep_ofat_return.png" width="380"/><br><sub>OFAT sweep — return per hyperparameter</sub></td>
+</tr>
+<tr>
+<td align="center"><img src="part2/figures/sweep_ofat_success.png" width="380"/><br><sub>OFAT sweep — success rate per hyperparameter</sub></td>
+<td align="center"><img src="part2/figures/sweep_ofat_knob.png" width="380"/><br><sub>OFAT sweep — effect of individual hyperparameters</sub></td>
+</tr>
+</table>
+</details>
+
 ## Rendering a rollout
 
 ```
