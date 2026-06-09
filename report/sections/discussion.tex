@@ -1,22 +1,28 @@
 \section{Discussion}
 
-The results highlight how the vanilla REINFORCE algorithm struggled to discover a policy that allows the locomotion of the Hopper, achieving a low average reward during training (around $1006$) and displaying low test returns (ranging from $710$ to $1305$).
-Practically this means that the agent cannot effectively hop but at most it stays still trying not to fall and at most leap forward and fall. 
+The results highlight how the vanilla REINFORCE algorithm struggled to 
+discover a policy that allows the locomotion of the Hopper, achieving a 
+low average reward during training (around $1006$) and displaying low test 
+returns (ranging from $710$ to $1305$). As expected, this is due to the high 
+variance of full-trajectory Monte Carlo returns, which causes noisy gradient 
+updates leading to inefficient learning and slow convergence. Regarding 
+training time, $57.6$ minutes was the fastest among the three, primarily 
+driven by the short episode length ($178$ steps on average) caused by the 
+agent frequently falling.
 
-As expected, vanilla REINFORCE struggled due to the high variance of full-trajectory Monte Carlo returns, which causes noisy gradient updates, leading to inefficient learning and slow convergence.
+Introducing a constant baseline of $b{=}20$ had a positive impact on 
+performance: the peak training average reached $1807$ and the best-performing 
+seed achieved a mean test return of $2444$. The baseline reduces the variance 
+of the gradient estimates by subtracting a fixed offset from the Monte Carlo 
+return, which also improved the average episode length from $178$ to $215$ 
+steps, reflected in the higher training time of $70.3$ minutes. 
 
-Regarding the time needed for training, this was the fastest among the three with a value of $57.6$ minutes, in fact this is primarily driven by episode length,
-the Hopper in this case often falls causing the early termination of the episode (the average episode length is $178$), reducing the computational time needed for the learning process.
+In principle, 
+a good baseline should approximate the expected return, given that vanilla 
+REINFORCE achieved a mean training reward of around $1006$, the chosen value 
+of $b{=}20$ is far from this optimum, meaning that the variance reduction 
+achieved is real but limited.
 
-Introducing a constant baseline of $b{=}20$ had a positive impact on the agent performance. The peak training average reached $1807$ and the test evaluations showed that the best-performing seed achieved a mean test return of
-$2444$.
-
-This means that the agent was able to learn a policy that allowed it to effectively hop and move forward for a longer period of time.
-The baseline is subtracted from the Monte Carlo return to reduce the variance of the gradient estimates. This reduces the amount of noise in the gradient updates, leading to a more stable and efficient learning process. 
-This also improved the average episode length, which increased from 178 to 215, meaning that the agent was able to stay alive for longer periods of time. 
-
-This is also reflected in the average training time that was significantly higher with a value of $70.3$ minutes, proving that the agent
-was not falling for a longer period of time.
 
 While a constant baseline ($b=20$) reduced variance and improved performance over vanilla REINFORCE, it applies a global correction that is identical across all states. Actor-Critic further improved stability by using a state-dependent baseline $V(s)$, which adapts to the local structure of the value function, providing a much more effective variance reduction at each step.
 

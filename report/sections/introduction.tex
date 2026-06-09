@@ -3,16 +3,13 @@
 Reinforcement Learning (RL) is becoming one of the most popular and successful approaches for solving continuous control
 problems, especially in robotics. (Tera et al., 2026) OR/AND (Kober et al., 2013)
 Indeed, this setting introduces several challenges such as delayed rewards, exploration--exploitation trade-offs,
-high-dimensional continuous action spaces and potentially unstable training dynamics. In addition to this, robotic control
-represents a challenging application of RL also due to the fact that small changes in the policy can lead to very different
-behaviors and delayed feedback can make credit assignment complex.
+high-dimensional continuous action spaces and potentially unstable training dynamics.
 
 Another major challenge this paper tackles is sim-to-real transfer. Policies are commonly trained in simulation, where data
 collection is cheap and safe, and then applied to environments whose dynamics differ from those seen during training.
 This discrepancy represents the reality gap and it can significantly degrade performance. (Tobin et al., 2017)
 In the second half of the project, the reality gap is represented through a variation in the mass of a manipulated object:
 from a source environment with a 1 kg cube to a target environment with a 5 kg cube.
-The objective is to learn an effective control policy which is also robust to the reality gap.
 
 The project is divided into two complementary parts. In the first part, we implement and analyze policy-gradient methods on
 the Hopper continuous-control environment, observing learning dynamics, exploration behavior, critic stability, and overall
@@ -21,6 +18,5 @@ augmented with Generalized Advantage Estimation, evaluating the impact of varian
 
 In the second part, we investigate sim-to-real transfer on the PandaPush environment \cite{gallouedec2021pandagym}, first evaluating an on-policy approach with Proximal Policy Optimization (PPO) \cite{SchulmanPPO2017}
 against Soft Actor-Critic (SAC) \cite{SAC2018}, an off-policy method, together with Uniform Domain Randomization (UDR) and Automatic Domain Randomization (ADR) \cite{rubikADR2019}
-strategies to address the reality gap. The goal is to evaluate how algorithmic choices and domain-randomization techniques
-affect robustness and transfer performance across different object masses. (Gallouédec et al., 2024)
+strategies to address the reality gap.
 
