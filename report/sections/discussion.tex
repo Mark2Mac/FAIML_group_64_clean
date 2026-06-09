@@ -36,7 +36,6 @@ due to the Hopper maximizing only the survival component of the reward function.
 
 Standing actions were continuously selected as they tended to achieve high positive advantages, while jumping actions
 consistently turned out to be worse than the critic’s expectations.
-On the other hand, jumping actions continuously turned out to be worse than the critic’s expectations.
 This occurred due to the initial usage of the TD(0) target, in which only the immediate subsequent
 state was considered, so jumping actions always led to immediate worse states, making them less appealing to a
 short-sighted critic and discouraging their exploration.
@@ -59,11 +58,11 @@ policy updates and prevented gradient explosions despite the highly non-stationa
 
 Despite these improvements, the final policy still exhibits substantial variability and has not fully converged. Future work
 could investigate additional stabilization techniques like TRPO or PPO which exploits trust region and clipped policy
-updates (Schulman et al., 2017).
+updates \cite{SchulmanTRPO2015,SchulmanPPO2017}.
 
 Furthermore, more advanced actor-critic methods for continuous control, such as DDPG and TD3, could be explored,
 exploiting double-critic architectures and delayed policy updates, to potentially reduce value-estimation errors
-and improve training stability (Fujimoto et al., 2018).
+and improve training stability \cite{Fujimoto2018}.
 
 
 \begin{figure}[htbp]

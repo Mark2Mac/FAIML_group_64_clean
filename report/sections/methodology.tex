@@ -2,9 +2,9 @@
 \subsection{Part 1: Hopper Continuous Control}
 
 Part 1 focused on learning a locomotion policy for the Hopper environment using policy-gradient methods.
-Three approaches were implemented and compared: REINFORCE, REINFORCE with baseline, and Actor-Critic architectures. (Sutton \& Barto, 2018)
+Three approaches were implemented and compared: REINFORCE, REINFORCE with baseline, and Actor-Critic architectures \cite{SuttonBarto2018}.
 
-REINFORCE (Williams, 1992) is the simplest policy algorithm, updating the policy parameters at the end of each episode using the full Monte Carlo return. The loss minimized at each update is:
+REINFORCE \cite{Williams1992} is the simplest policy algorithm, updating the policy parameters at the end of each episode using the full Monte Carlo return. The loss minimized at each update is:
 
 \[
 L = -\sum_t \left(G_t - b\right) \log \pi_\theta(a_t | s_t)
@@ -31,7 +31,7 @@ In parallel, the critic minimizes the squared difference between the predicted s
 L_{\text{critic}} = \mathbb{E}\left[\left(r_t+\gamma V_\phi(s_{t+1})-V_\phi(s_t)\right)^2\right].
 \]
 
-Since we are considering a continuous enviroment, all models policy outputs both the mean and standard
+Since we are considering a continuous environment, all models' policy outputs both the mean and standard
 deviation of a Gaussian action distribution:
 
 \[
@@ -42,7 +42,7 @@ where both parameters are learned by the policy network. Actions are sampled dur
 while the mean action $\mu_\theta(s_t)$ is used during evaluation.
 
 To improve the quality of the policy updates, Generalized Advantage Estimation (GAE)
-was implemented. (Schulman et al., 2015) Therefore, advantages are computed as:
+was implemented \cite{SchulmanGAE2015}, with advantages computed as:
 
 \[
 \hat A_t^{GAE} = \sum_{l=0}^{\infty} (\gamma\lambda)^l \delta_{t+l}
@@ -59,13 +59,13 @@ is the temporal-difference error.
 
 Subsequently, advantages were normalized before policy updates in order to stabilize gradients,
 improve critic's estimates and reduce training instability. A minimum standard deviation (sigma floor)
-was enforced to prevent premature collapse of exploration and promoting it even in later stages.
+was enforced to prevent premature collapse of exploration and promote it even in later stages.
 Additionally, a triggered learning-rate decay mechanism was introduced during later stages of training to reduce
 update magnitude after the policy had discovered effective locomotion behaviors.
 
 
-More specifically, the decay was activated only once one of the trigger conditions reported in Table~\ref{tab:lr_decay} was satisfied,
-causing the learning rate to linearly reduce from $3 \times 10^{-4}$ to $10^{-5}$ until the end of training.
+More specifically, the decay was activated only once one of the trigger conditions reported in Table~\ref{tab:lr_decay}
+was satisfied, causing the learning rate to linearly reduce from $3 \times 10^{-4}$ to $10^{-5}$ until the end of training.
 
 \begin{table}[ht]
 \centering
