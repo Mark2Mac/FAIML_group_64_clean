@@ -20,3 +20,11 @@ In the second part, we investigate sim-to-real transfer on the PandaPush environ
 against Soft Actor-Critic (SAC) \cite{SAC2018}, an off-policy method, together with Uniform Domain Randomization (UDR) and Automatic Domain Randomization (ADR) \cite{rubikADR2019}
 strategies to address the reality gap.
 
+\section{Related Work}
+The use of RL for robotic control has been widely studied, and a broad overview of the field can be found in \cite{Kober2013}.
+The policy-gradient family starts with REINFORCE \cite{Williams1992}, which however suffers from the high variance of its Monte Carlo gradient estimates.
+Baselines and actor-critic methods \cite{SuttonBarto2018} were introduced to reduce this variance, and were later improved by Generalized Advantage Estimation \cite{SchulmanGAE2015} and by trust-region or clipped objectives such as TRPO and PPO \cite{SchulmanTRPO2015, SchulmanPPO2017}.
+Off-policy methods like SAC \cite{SAC2018} and TD3 \cite{Fujimoto2018} reuse past experience through a replay buffer, making them more sample efficient in continuous control.
+Regarding the reality gap, domain randomization \cite{Tobin2017} trains the agent over a distribution of simulator parameters rather than a single nominal value, while ADR \cite{rubikADR2019} adapts the randomization ranges during training based on the agent's performance.
+Our implementation relies on Gym and MuJoCo \cite{Brockman2016, Todorov2012}, panda-gym \cite{gallouedec2021pandagym} and Stable-Baselines3 \cite{stable-baselines3}.
+

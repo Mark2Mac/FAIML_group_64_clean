@@ -4,12 +4,10 @@ This project explored reinforcement learning for continuous control and
 sim-to-real transfer across two tasks. In Part 1, the Actor-Critic algorithm 
 equipped with Generalized Advantage Estimation, advantage normalization, 
 and learning-rate decay proved to be the strongest performer on the Hopper 
-environment, while vanilla REINFORCE and its constant-baseline variant 
-served as important stepping stones toward understanding the role of 
-variance reduction in policy gradient methods.
+environment, while vanilla REINFORCE and its constant-baseline variant
+highlighted the role of variance reduction in policy gradient methods.
 
-In Part 2, the focus shifted to sim-to-real transfer in the PandaPush environment. 
-The final selected approach was SAC combined with UDR. By training on a broad distribution of cube masses, 
-UDR produced a substantially more robust policy that significantly reduced the sim-to-real gap. 
-These results confirm the effectiveness of domain randomization as a practical strategy 
-for improving transfer performance in robotic reinforcement-learning tasks.
+In Part 2, the focus shifted to sim-to-real transfer in the PandaPush environment.
+The final selected approach was SAC combined with UDR. Training on a broad distribution of cube masses produced
+a more robust policy that reduced the sim-to-real gap, confirming the effectiveness of domain randomization as a
+practical strategy for improving transfer performance in robotic reinforcement-learning tasks.

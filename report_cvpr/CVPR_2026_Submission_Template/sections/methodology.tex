@@ -155,6 +155,29 @@ The target environment uses a cube mass of 5 kg. However, the randomization rang
 First step of this section was to train the PPO and SAC agents on the source environment with fixed mass, in order to evaluate their behavior and performance on this task.
 Both algorithms were implemented using the Stable Baselines3 library \cite{stable-baselines3}, with their hyperparameter configurations selected based on extensive bayesian optimization (taking advantage of \textit{Weigths \& Biases Sweeps \cite{wandb}}).
 The final hyperparameters were chosen based on best average reward and success rate across more than 30 training runs for each algorithm, with the best-performing configuration selected for the final evaluation phase.
+The final SAC configuration is reported in Table~\ref{tab:sac_configuration}; observations and rewards were normalized with \texttt{VecNormalize}.
 
-After training, both PPO and SAC were evaluated on the target environment and compared, aiming to choose the best-performnig algorithm as the base on which to apply domain randomization.
-The selected algorithm (SAC) was then trained on the source domain under each strategy (none, UDR, ADR) and evaluated deterministically on both the source and target domains over $50$ episodes per seed ($3$ seeds), reporting mean success rate and mean return. The \texttt{none} source$\to$target configuration provides the lower bound and the target$\to$target oracle the upper bound, so UDR and ADR are assessed by how much of that gap they close on the target domain.
+\begin{table}[ht]
+\centering
+\caption{Final SAC Configuration}
+\label{tab:sac_configuration}
+\resizebox{0.7\columnwidth}{!}{
+\begin{tabular}{ll}
+\hline
+Hyperparameter & Value \\
+\hline
+Learning rate & $3 \times 10^{-4}$ \\
+Batch size & 1024 \\
+Replay buffer size & $10^{6}$ \\
+Soft-update coefficient ($\tau$) & 0.005 \\
+Discount factor ($\gamma$) & 0.99 \\
+Entropy coefficient & auto \\
+Train freq.\ / gradient steps & 1 / 1 \\
+Training timesteps & $5 \times 10^{5}$ \\
+\hline
+\end{tabular}
+}
+\end{table}
+
+After training, both PPO and SAC were evaluated on the target environment and compared, aiming to choose the best-performing algorithm as the base on which to apply domain randomization.
+The selected algorithm (SAC) was then trained on the source domain under each strategy (none, UDR, ADR) and evaluated deterministically on both the source and target domains over $200$ episodes per seed ($3$ seeds), reporting mean success rate and mean return. The \texttt{none} source$\to$target configuration provides the lower bound and the target$\to$target oracle the upper bound, so UDR and ADR are assessed by how much of that gap they close on the target domain.

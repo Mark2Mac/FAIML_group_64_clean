@@ -12,7 +12,7 @@ Figure~\ref{fig:experiments_reward} shows the learning curves (rolling average o
 \caption{Training performance on Hopper-v4 (mean over 3 seeds). \emph{Avg-100} denotes the 100-episode rolling mean return. \emph{Std} and \emph{Avg Ep.\ Len} are computed over all $70{,}000$ training episodes.}
 \label{tab:part1_results}
 \resizebox{\linewidth}{!}{%
-\renewcommand{\arraystretch}{1.2}
+\renewcommand{\arraystretch}{1.05}
 \begin{tabular}{lrrrrcc}
 \hline
 \textbf{Algorithm} & \textbf{Best Avg-100} & \textbf{Final Avg-100} & \textbf{Std} & \textbf{Best Episode} & \textbf{Avg Ep.\ Len} & \textbf{Time (min)} \\
@@ -27,25 +27,17 @@ Actor-Critic         & \textbf{1938} & \textbf{1360} & \textbf{734} & \textbf{34
 
 \begin{table}[ht]
 \centering
-\caption{test performance on Hopper-v4.}
+\caption{Test return (mean $\pm$ std) on Hopper-v4, per seed.}
 \label{tab:part1_test_results}
 \resizebox{\linewidth}{!}{%
-\renewcommand{\arraystretch}{1.2}
+\renewcommand{\arraystretch}{1.1}
 \begin{tabular}{lccc}
 \hline
-\textbf{Algorithm} & \textbf{Seed} & \textbf{Test Return (Mean $\pm$ Std)} & \textbf{Test Length (Mean $\pm$ Std)} \\
+\textbf{Algorithm} & \textbf{Seed 1} & \textbf{Seed 2} & \textbf{Seed 3} \\
 \hline
-REINFORCE ($b{=}0$)  & 1 & $710 \pm 484$ & $281 \pm 158$ \\
-                     & 2 & $726 \pm 296$ & $230 \pm 85$ \\
-                     & 3 & $1305 \pm 547$ & $582 \pm 283$ \\
-\hline
-REINFORCE ($b{=}20$) & 1 & $782 \pm 929$ & $304 \pm 350$ \\
-                     & 2 & $1461 \pm 1097$ & $461 \pm 330$ \\
-                     & 3 & $2444 \pm 182$ & $976 \pm 75$ \\
-\hline
-Actor-Critic         & 1 & $1725 \pm 1382$ & $555 \pm 432$ \\
-                     & 2 & $\mathbf{3335 \pm 14}$ & $\mathbf{1000 \pm 0}$ \\
-                     & 3 & $760 \pm 111$ & $251 \pm 30$ \\
+REINFORCE ($b{=}0$)  & $710 \pm 484$ & $726 \pm 296$ & $1305 \pm 547$ \\
+REINFORCE ($b{=}20$) & $782 \pm 929$ & $1461 \pm 1097$ & $2444 \pm 182$ \\
+Actor-Critic         & $1725 \pm 1382$ & $\mathbf{3335 \pm 14}$ & $760 \pm 111$ \\
 \hline
 \end{tabular}%
 }
@@ -53,7 +45,7 @@ Actor-Critic         & 1 & $1725 \pm 1382$ & $555 \pm 432$ \\
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=\linewidth]{imgs/experiments_reward.pdf}
+    \includegraphics[width=0.8\linewidth]{imgs/experiments_reward.pdf}
     \caption{Average return (rolling window $= 100$ episodes) $\pm$ standard deviation across 3 seeds for REINFORCE ($b{=}0$, $b{=}20$) and Actor-Critic on Hopper-v4.}
     \label{fig:experiments_reward}
 \end{figure}
@@ -108,20 +100,14 @@ Relative to the upper bound, UDR successfully closed approximately 66\% of the r
 \textbf{Algorithm \& Strategy} & \textbf{Train Env} & \textbf{Test Env} & \textbf{Mean Return} & \textbf{Success Rate} \\ \hline
 PPO (Vanilla) & Source & Source & $-3.485 \pm 0.091$ & $20.0\% \pm 0.1\%$ \\
 SAC (Vanilla) & Source & Source & $-0.565 \pm 0.118$ & $98.5\% \pm 2.1\%$ \\
-SAC (Vanilla) - Lower Bound & Source & Target & $-0.633 \pm 0.152$ & $97.5\% \pm 0.3\%$ \\
-SAC + ADR & Source & Target & $-0.556 \pm 0.044$ & $99.2\% \pm 1.1\%$ \\
-SAC + UDR - Best Transfer & Source & Target & $-0.509 \pm 0.032$ & $99.7\% \pm 0.4\%$ \\
+SAC (Vanilla) - Lower Bound & Source & Target & $-0.633 \pm 0.152$ & $97.5\% \pm 3.5\%$ \\
+SAC + UDR & Source & Source & $-0.485 \pm 0.036$ & $99.5\% \pm 0.4\%$ \\
+SAC + ADR & Source & Source & $-0.583 \pm 0.079$ & $98.3\% \pm 1.2\%$ \\
+SAC + ADR & Source & Target & $-0.556 \pm 0.044$ & $99.2\% \pm 0.8\%$ \\
+SAC + UDR - Best Transfer & Source & Target & $-0.509 \pm 0.032$ & $99.7\% \pm 0.2\%$ \\
 SAC (Oracle) - Upper Bound & Target & Target & $-0.445 \pm 0.019$ & $100.0\% \pm 0.0\%$ \\ \hline
 \end{tabular}%
 }
-\vspace{2mm}
-\caption{Target-environment performance comparison across different training strategies.}
+\caption{Performance comparison across training strategies and evaluation domains (mean $\pm$ std over 3 seeds, 200 episodes per seed).}
 \label{tab:sim2real_results}
 \end{table}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\columnwidth]{imgs/eval_mean_return.png}
-    \caption{Mean return comparison across training strategies}
-    \label{fig:eval_return}
-\end{figure}

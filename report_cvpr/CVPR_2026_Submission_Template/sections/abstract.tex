@@ -6,9 +6,8 @@ including REINFORCE, REINFORCE with baseline, and Actor-Critic are implemented
 and evaluated on the Hopper continuous-control environment, with improvements 
 including Generalized Advantage Estimation, advantage normalization, a learned 
 exploration variance with a sigma floor, and a triggered learning-rate decay 
-mechanism. The resulting Actor-Critic agent achieved average rewards around 
-2000 and individual episodes exceeding 3000, while the baseline variant reached 
-a peak test reward of 2444 compared to 1305 for vanilla REINFORCE. In the 
+mechanism. The resulting Actor-Critic agent outperformed both
+REINFORCE variants, both during training and at test time. In the
 second part, sim-to-sim transfer is investigated on the PandaPush environment 
 using PPO, SAC, UDR, and ADR: SAC outperformed PPO, and UDR achieved the best 
 transfer performance, reducing the sim-to-real gap by approximately 66\% 
