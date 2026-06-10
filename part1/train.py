@@ -14,7 +14,7 @@ def main():
     parser.add_argument("--runs", type=int, default=3, help="Number of independent runs")
     parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate for the policy")
     parser.add_argument("--wandb", action="store_true", help="Enable Weights & Biases logging")
-    parser.add_argument("--project", type=str, default="hopper-ac-gae-sigmaFloor-entropy-weirdLR", help="W&B project name")
+    parser.add_argument("--project", type=str, default="hopper_REINFORCE_Actor_Critic", help="W&B project name")
     parser.add_argument("--output-dir", type=str, default="part1/models")
     parser.add_argument("--run-tag", type=str, default="reinforce")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")

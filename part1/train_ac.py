@@ -24,7 +24,7 @@ def main():
     parser.add_argument("--lr", type=float, default=3e-4, help="Learning rate for both actor and critic")
 
     parser.add_argument("--wandb", action="store_true", help="Enable Weights & Biases logging")                                 # specify it when runing
-    parser.add_argument("--project", type=str, default="hopper-ac-gae-sigmaFloor-entropy-weirdLR", help="W&B project name")
+    parser.add_argument("--project", type=str, default="hopper_REINFORCE_Actor_Critic", help="W&B project name")
 
     parser.add_argument("--gae-lambda", type=float, default=0.95, help="GAE lambda")
     parser.add_argument("--sigma-floor", type=float, default=0.1, help="Minimum policy std added after softplus")

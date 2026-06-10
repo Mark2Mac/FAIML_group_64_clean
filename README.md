@@ -79,7 +79,7 @@ We ran a lot of trainings, so the heavy stuff stays outside the repo.
 | Resource | Link |
 |---|---|
 | Drive — part 2 SAC/UDR/ADR models, TB logs, sweep figures | https://drive.google.com/drive/folders/1E1y1AwZ2oIPeDL7Y4RPE5VPml3dOItwC |
-| W&B — Part 1 final runs (REINFORCE / Actor-Critic, 3 seeds — the report numbers) | https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR |
+| W&B — Part 1 final runs (REINFORCE / Actor-Critic, 3 seeds — the report numbers) | https://wandb.ai/s355100-politecnico-di-torino/hopper_REINFORCE_Actor_Critic |
 | W&B — Part 1 earlier runs (first 3-seed batch, 70k episodes) | https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1 |
 | W&B — Part 2 (SAC + UDR/ADR, PandaPush) | https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2 |
 | W&B — PPO baseline (step-budget scaling) | https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-ppo |
@@ -93,13 +93,13 @@ gives wrong numbers.
 <details>
 <summary><b>Direct links to the individual W&B runs</b></summary>
 
-**Part 1 — Hopper, final runs** (`hopper-ac-gae-sigmaFloor-entropy-weirdLR` — these back the report numbers)
+**Part 1 — Hopper, final runs** (`hopper_REINFORCE_Actor_Critic` — these back the report numbers)
 
 | Algorithm | Seed 42 | Seed 67 | Seed 128 |
 |---|---|---|---|
-| Actor-Critic | [i545aipy](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/i545aipy) | [636v9kg2](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/636v9kg2) | [lomqneko](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/lomqneko) |
-| REINFORCE (no baseline) | [o13ot15g](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/o13ot15g) | [cyjiwtga](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/cyjiwtga) | [qglsc8ct](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/qglsc8ct) |
-| REINFORCE (baseline b=20) | [u0dpdlff](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/u0dpdlff) | [sz67y12d](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/sz67y12d) | [1wfqf7vy](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/1wfqf7vy) |
+| Actor-Critic | [i545aipy](https://wandb.ai/s355100-politecnico-di-torino/hopper_REINFORCE_Actor_Critic/runs/i545aipy) | [636v9kg2](https://wandb.ai/s355100-politecnico-di-torino/hopper_REINFORCE_Actor_Critic/runs/636v9kg2) | [lomqneko](https://wandb.ai/s355100-politecnico-di-torino/hopper_REINFORCE_Actor_Critic/runs/lomqneko) |
+| REINFORCE (no baseline) | [o13ot15g](https://wandb.ai/s355100-politecnico-di-torino/hopper_REINFORCE_Actor_Critic/runs/o13ot15g) | [cyjiwtga](https://wandb.ai/s355100-politecnico-di-torino/hopper_REINFORCE_Actor_Critic/runs/cyjiwtga) | [qglsc8ct](https://wandb.ai/s355100-politecnico-di-torino/hopper_REINFORCE_Actor_Critic/runs/qglsc8ct) |
+| REINFORCE (baseline b=20) | [u0dpdlff](https://wandb.ai/s355100-politecnico-di-torino/hopper_REINFORCE_Actor_Critic/runs/u0dpdlff) | [sz67y12d](https://wandb.ai/s355100-politecnico-di-torino/hopper_REINFORCE_Actor_Critic/runs/sz67y12d) | [1wfqf7vy](https://wandb.ai/s355100-politecnico-di-torino/hopper_REINFORCE_Actor_Critic/runs/1wfqf7vy) |
 
 **Part 2 — PandaPush SAC** (`faiml-group64-part2`)
 
@@ -117,7 +117,7 @@ gives wrong numbers.
 Full set of plots produced during the project (beyond the few that fit in the 5-page report).
 Interactive versions of the curves and sweeps are on the linked W&B projects.
 
-<details>
+<details open>
 <summary><b>Part 1 — Hopper (REINFORCE &amp; Actor-Critic)</b></summary>
 <br>
 <table>
@@ -136,7 +136,7 @@ Interactive versions of the curves and sweeps are on the linked W&B projects.
 </table>
 </details>
 
-<details>
+<details open>
 <summary><b>Part 2 — PandaPush: transfer &amp; mass sensitivity</b></summary>
 <br>
 <table>
@@ -155,7 +155,7 @@ Interactive versions of the curves and sweeps are on the linked W&B projects.
 </table>
 </details>
 
-<details>
+<details open>
 <summary><b>Hyperparameter sweeps (Bayesian &amp; OFAT)</b></summary>
 <br>
 <table>
