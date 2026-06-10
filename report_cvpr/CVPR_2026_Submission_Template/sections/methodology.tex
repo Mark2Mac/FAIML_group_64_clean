@@ -25,7 +25,7 @@ To improve the quality of the policy updates, Generalized Advantage Estimation (
 was implemented \cite{SchulmanGAE2015}, which computes the advantage function as a weighted sum of n-step returns, controlled by the $\lambda$ parameter.
 
 Subsequently, advantages were normalized before policy updates in order to stabilize gradients,
-improve critic's estimates and reduce training instability. A minimum standard deviation (sigma floor)
+improve the critic's estimates and reduce training instability. A minimum standard deviation (sigma floor)
 was enforced to prevent premature collapse of exploration and promote it even in later stages.
 Additionally, a triggered learning-rate decay mechanism was introduced during later stages of training to reduce
 update magnitude after the policy had discovered effective locomotion behaviors.
@@ -52,7 +52,7 @@ Minimum learning rate & $10^{-5}$ \\
 }
 \end{table}
 
-The goal was to reduce update magnitude once the Hopper had likely discovered jumping, as this behaviour leads to
+The goal was to reduce the update magnitude once the Hopper had likely discovered jumping, as this behaviour leads to
 higher rewards while being much more unstable. All thresholds were chosen empirically.
 
 % high average reward together
