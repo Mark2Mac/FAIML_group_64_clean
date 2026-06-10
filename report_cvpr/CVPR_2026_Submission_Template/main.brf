@@ -15,6 +15,6 @@
 \backcite {SchulmanTRPO2015}{{3}{2.2}{subsection.2.2}}
 \backcite {stable-baselines3}{{3}{2.2}{subsection.2.2}}
 \backcite {wandb}{{3}{2.2}{subsection.2.2}}
-\backcite {SchulmanTRPO2015}{{6}{4}{section.4}}
-\backcite {SchulmanPPO2017}{{6}{4}{section.4}}
-\backcite {Fujimoto2018}{{6}{4}{section.4}}
+\backcite {SchulmanTRPO2015}{{5}{4}{section.4}}
+\backcite {SchulmanPPO2017}{{5}{4}{section.4}}
+\backcite {Fujimoto2018}{{5}{4}{section.4}}

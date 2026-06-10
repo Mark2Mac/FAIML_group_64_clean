@@ -6,17 +6,12 @@ All three algorithms were trained for 70{,}000 episodes on the Hopper-v4 environ
 Table~\ref{tab:part1_results} summarises the training performance;
 Figure~\ref{fig:experiments_reward} shows the learning curves (rolling average over 100 episodes $\pm$ standard deviation across seeds).
 
-In the table, \emph{Best Avg-100} is the peak value of the 100-episode rolling mean (averaged over seeds);
-\emph{Final Avg-100} is the mean return over the last 100 training episodes; \emph{Std} is the standard deviation computed over all 70{,}000 episodes across all seeds;
-\emph{Best Episode} is the highest single-episode return observed per seed, averaged across seeds;
-\emph{Avg Ep.\ Len} is the mean episode length over the full 70{,}000 training episodes across all seeds;
-\emph{Time (min)} is the total time required to train the agent.
 
 
 
 \begin{table}[ht]
 \centering
-\caption{training performance on Hopper-v4 (mean over 3 seeds).}
+\caption{Training performance on Hopper-v4 (mean over 3 seeds). \emph{Avg-100} denotes the 100-episode rolling mean return. \emph{Std} and \emph{Avg Ep.\ Len} are computed over all $70{,}000$ training episodes.}
 \label{tab:part1_results}
 \resizebox{\linewidth}{!}{%
 \renewcommand{\arraystretch}{1.2}
