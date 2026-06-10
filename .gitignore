@@ -4,10 +4,8 @@ venv/
 env/
 
 # Modelli salvati
-*.pth
 part1/models_backup/
 part1/render_best_model.py
-part1/models
 
 # Cache di Python
 __pycache__/
@@ -66,4 +64,6 @@ part1/hopper_videos/hopper_video_maker.py
 !assets/sac_push.gif
 !assets/hopper.gif
 !assets/social_preview.png
+
 part1/render_gif.py
+part1/colab_template/
