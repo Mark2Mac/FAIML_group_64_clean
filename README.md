@@ -175,7 +175,7 @@ Interactive versions of the curves and sweeps are on the linked W&B projects.
 ```
 # Part 1 — Hopper
 cd part1
-python render_gif.py --model models_ac_70k_filippo_2026-06-07/policy_ac_70k_filippo_2026-06-07_run_1_best.pth \
+python render_gif.py --model models_ac_70k_2026-06-07/policy_ac_70k_2026-06-07_run_1_best.pth \
     --episodes 3 --out ../assets/hopper.gif
 
 # Part 2 — PandaPush

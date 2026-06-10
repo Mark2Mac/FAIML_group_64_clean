@@ -17,10 +17,10 @@ _BASE = "part1"
 _MODEL_SPECS = {
     "REINFORCE (b=0)": [
         (
-            f"{_BASE}/models_reinforce_70k_filippo_2026-06-07/"
-            "policy_reinforce_70k_filippo_2026-06-07_baseline_0.0_run_1_best.pth",
-            f"{_BASE}/models_reinforce_70k_filippo_2026-06-07/"
-            "policy_reinforce_70k_filippo_2026-06-07_baseline_0.0_run_1.pth",
+            f"{_BASE}/models_reinforce_70k_2026-06-07/"
+            "policy_reinforce_70k_2026-06-07_baseline_0.0_run_1_best.pth",
+            f"{_BASE}/models_reinforce_70k_2026-06-07/"
+            "policy_reinforce_70k_2026-06-07_baseline_0.0_run_1.pth",
         ),
         (
             f"{_BASE}/models_reinforce_extra_seeds_2026-06-07/"
@@ -37,10 +37,10 @@ _MODEL_SPECS = {
     ],
     "REINFORCE (b=20)": [
         (
-            f"{_BASE}/models_reinforce_70k_filippo_2026-06-07/"
-            "policy_reinforce_70k_filippo_2026-06-07_baseline_20.0_run_1_best.pth",
-            f"{_BASE}/models_reinforce_70k_filippo_2026-06-07/"
-            "policy_reinforce_70k_filippo_2026-06-07_baseline_20.0_run_1.pth",
+            f"{_BASE}/models_reinforce_70k_2026-06-07/"
+            "policy_reinforce_70k_2026-06-07_baseline_20.0_run_1_best.pth",
+            f"{_BASE}/models_reinforce_70k_2026-06-07/"
+            "policy_reinforce_70k_2026-06-07_baseline_20.0_run_1.pth",
         ),
         (
             f"{_BASE}/models_reinforce_extra_seeds_2026-06-07/"
@@ -57,10 +57,10 @@ _MODEL_SPECS = {
     ],
     "Actor-Critic": [
         (
-            f"{_BASE}/models_ac_70k_filippo_2026-06-07/"
-            "policy_ac_70k_filippo_2026-06-07_run_1_best.pth",
-            f"{_BASE}/models_ac_70k_filippo_2026-06-07/"
-            "policy_ac_70k_filippo_2026-06-07_run_1.pth",
+            f"{_BASE}/models_ac_70k_2026-06-07/"
+            "policy_ac_70k_2026-06-07_run_1_best.pth",
+            f"{_BASE}/models_ac_70k_2026-06-07/"
+            "policy_ac_70k_2026-06-07_run_1.pth",
         ),
         (
             f"{_BASE}/models_ac_extra_seeds_2026-06-07/"

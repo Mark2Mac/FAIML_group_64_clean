@@ -3,9 +3,9 @@ Plot script for Part 1 — generates all figures and tables for the report.
 Compares REINFORCE (b=0, b=20) vs Actor-Critic across 3 runs.
 
 Data is spread across four directories (date-stamped 2026-06-07):
-  - models_reinforce_70k_filippo_2026-06-07   → REINFORCE run 1 (default seed)
+  - models_reinforce_70k_2026-06-07   → REINFORCE run 1 (default seed)
   - models_reinforce_extra_seeds_2026-06-07   → REINFORCE runs 2 & 3 (seed 67, seed 128)
-  - models_ac_70k_filippo_2026-06-07          → AC run 1 (default seed)
+  - models_ac_70k_2026-06-07          → AC run 1 (default seed)
   - models_ac_extra_seeds_2026-06-07          → AC runs 2 & 3 (seed 67, seed 128)
 
 Usage (run from project root):
@@ -32,24 +32,24 @@ _BASE = "part1"
 # The loader will build: <dir>/<kind>_<stem>.npy
 _RUN_SPECS = {
     "REINFORCE (b=0)": [
-        (_BASE + "/models_reinforce_70k_filippo_2026-06-07",
-         "reinforce_70k_filippo_2026-06-07_baseline_0.0_run_1"),
+        (_BASE + "/models_reinforce_70k_2026-06-07",
+         "reinforce_70k_2026-06-07_baseline_0.0_run_1"),
         (_BASE + "/models_reinforce_extra_seeds_2026-06-07",
          "reinforce_2026-06-07_baseline_0.0_seed_67_run_1"),
         (_BASE + "/models_reinforce_extra_seeds_2026-06-07",
          "reinforce_2026-06-07_baseline_0.0_seed_128_run_1"),
     ],
     "REINFORCE (b=20)": [
-        (_BASE + "/models_reinforce_70k_filippo_2026-06-07",
-         "reinforce_70k_filippo_2026-06-07_baseline_20.0_run_1"),
+        (_BASE + "/models_reinforce_70k_2026-06-07",
+         "reinforce_70k_2026-06-07_baseline_20.0_run_1"),
         (_BASE + "/models_reinforce_extra_seeds_2026-06-07",
          "reinforce_2026-06-07_baseline_20.0_seed_67_run_1"),
         (_BASE + "/models_reinforce_extra_seeds_2026-06-07",
          "reinforce_2026-06-07_baseline_20.0_seed_128_run_1"),
     ],
     "Actor-Critic": [
-        (_BASE + "/models_ac_70k_filippo_2026-06-07",
-         "ac_70k_filippo_2026-06-07_run_1"),
+        (_BASE + "/models_ac_70k_2026-06-07",
+         "ac_70k_2026-06-07_run_1"),
         (_BASE + "/models_ac_extra_seeds_2026-06-07",
          "ac_2026-06-07_seed_67_run_1"),
         (_BASE + "/models_ac_extra_seeds_2026-06-07",
