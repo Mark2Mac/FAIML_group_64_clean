@@ -8,11 +8,12 @@
 \backcite {SAC2018}{{1}{1}{section.1}}
 \backcite {rubikADR2019}{{1}{1}{section.1}}
 \backcite {SuttonBarto2018}{{1}{2.1}{subsection.2.1}}
-\backcite {Williams1992}{{1}{2.1}{subsection.2.1}}
+\backcite {Williams1992}{{2}{2.1}{subsection.2.1}}
 \backcite {saxe2013exact}{{2}{2.1}{subsection.2.1}}
 \backcite {andrychowicz2020matters}{{2}{2.1}{subsection.2.1}}
 \backcite {SchulmanGAE2015}{{2}{2.1}{subsection.2.1}}
-\backcite {SchulmanTRPO2015}{{3}{2.2}{subsection.2.2}}
+\backcite {SchulmanPPO2017}{{2}{2.2}{subsection.2.2}}
+\backcite {SAC2018}{{3}{2.2}{subsection.2.2}}
 \backcite {stable-baselines3}{{3}{2.2}{subsection.2.2}}
 \backcite {wandb}{{3}{2.2}{subsection.2.2}}
 \backcite {SchulmanTRPO2015}{{5}{4}{section.4}}

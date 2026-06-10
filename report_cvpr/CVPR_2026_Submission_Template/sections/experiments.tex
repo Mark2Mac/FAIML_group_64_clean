@@ -7,8 +7,6 @@ Table~\ref{tab:part1_results} summarises the training performance;
 Figure~\ref{fig:experiments_reward} shows the learning curves (rolling average over 100 episodes $\pm$ standard deviation across seeds).
 
 
-
-
 \begin{table}[ht]
 \centering
 \caption{Training performance on Hopper-v4 (mean over 3 seeds). \emph{Avg-100} denotes the 100-episode rolling mean return. \emph{Std} and \emph{Avg Ep.\ Len} are computed over all $70{,}000$ training episodes.}
@@ -61,11 +59,11 @@ Actor-Critic         & 1 & $1725 \pm 1382$ & $555 \pm 432$ \\
 \end{figure}
 
 As we can clearly see from Table~\ref{tab:part1_results}, the Actor-Critic achieved the best overall training performance, outperforming the other models 
-in terms of highest Best Avg-100 reward (1938), highest Final Avg-100 reward (1360), highest Best Episode reward (3480) and longest average episode length (249 steps).
-In turn, REINFORCE with baseline achieved better overall scores than vanilla REINFORCE, improving the Best Avg-100 reward from 1006 to 1807 and the average
-episode length from 178 to 215 steps.
+in terms of highest Best Avg-100 reward, highest Final Avg-100 reward, highest Best Episode reward and longest average episode length.
+In turn, REINFORCE with baseline achieved better overall scores than vanilla REINFORCE, improving both the Best Avg-100 reward and the average
+episode length.
 Interestingly, despite expecting a gradient-estimator variance reduction with the introduction of a baseline, the opposite behaviour was recorded,
-where REINFORCE with baseline exhibited a higher reward standard deviation (399 vs 257) than vanilla REINFORCE.
+where REINFORCE with baseline exhibited a higher reward standard deviation than vanilla REINFORCE.
 
 Figure~\ref{fig:experiments_reward} shows that the Hopper improved its policy throughout training under all algorithms.
 However, the Actor-Critic achieved faster policy improvement, reaching larger reward quicker and eventually reaching reward scores that neither of the REINFORCE
@@ -73,7 +71,7 @@ variants were able to obtain.
 
 The test results reported in Table~\ref{tab:part1_test_results} support the claim that the Actor-Critic outperformed the other approaches, although substantial variability
 across seeds was recorded.
-Indeed, the best Actor-Critic seed achieved a mean test return of $3335 \pm 14$ and consistently survived for the full episode ($1000 \pm 0$ steps).
+Indeed, the best Actor-Critic seed achieved a mean test return of $3335 \pm 14$ and consistently survived for the full episode.
 On the other hand, the worst seed achieved a mere $760 \pm 111$ reward score, proving that Actor-Critic did not perform consistently across different seeds.
 Lower scores but similar variability was observed for both REINFORCE variants.
 
@@ -97,7 +95,10 @@ As a baseline, PPO failed to consistently solve the task even on the source envi
 
 To evaluate the sim-to-real transfer, we established a lower bound using vanilla SAC trained on the source and tested on the target environment, which achieved a return of -0.633. The upper bound was established by training and testing SAC directly on the target environment, yielding a return of -0.445. 
 
-The reality gap is evident in the performance drop of vanilla SAC. Applying domain randomization successfully mitigated this gap. While ADR improved the transfer return to -0.556, UDR achieved the best overall transfer performance with a return of -0.509 and a 99.7\% success rate. Relative to the upper bound, UDR successfully closed approximately 66\% of the reality gap.
+The reality gap is evident in the performance drop of vanilla SAC. 
+Applying domain randomization successfully mitigated this gap. While ADR improved the transfer return, 
+UDR achieved the best overall transfer performance as seen in Table \ref{tab:sim2real_results}.
+Relative to the upper bound, UDR successfully closed approximately 66\% of the reality gap while maintaining a very high success rate.
 
 \begin{table}[h]
 \centering
