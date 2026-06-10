@@ -41,7 +41,7 @@ Part 2 uses a local copy of panda-gym, install it from the folder:
   Training in `train.py` and `train_ac.py`, testing in `test.py`, rollout-to-GIF in `render_gif.py`.
 - `part2/` — PPO and SAC on the push task, with the UDR/ADR randomization living in
   `rand_wrapper.py`. Training in `train_sb3.py`, eval in `eval_sb3.py`, rollout-to-GIF in `render_gif.py`.
-- `report/` — LaTeX source and the compiled `main.pdf`.
+- `report_cvpr/` — LaTeX source (CVPR template) and the compiled `main.pdf`.
 
 ## Results at a glance
 
@@ -79,7 +79,8 @@ We ran a lot of trainings, so the heavy stuff stays outside the repo.
 | Resource | Link |
 |---|---|
 | Drive — part 2 SAC/UDR/ADR models, TB logs, sweep figures | https://drive.google.com/drive/folders/1E1y1AwZ2oIPeDL7Y4RPE5VPml3dOItwC |
-| W&B — Part 1 (REINFORCE / Actor-Critic, Hopper) | https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1 |
+| W&B — Part 1 final runs (REINFORCE / Actor-Critic, 3 seeds — the report numbers) | https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR |
+| W&B — Part 1 earlier runs (first 3-seed batch, 70k episodes) | https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1 |
 | W&B — Part 2 (SAC + UDR/ADR, PandaPush) | https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part2 |
 | W&B — PPO baseline (step-budget scaling) | https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-ppo |
 | W&B — SAC hyperparameter sweep (Bayesian) | https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-sweep |
@@ -92,13 +93,13 @@ gives wrong numbers.
 <details>
 <summary><b>Direct links to the individual W&B runs</b></summary>
 
-**Part 1 — Hopper** (`faiml-group64-part1`)
+**Part 1 — Hopper, final runs** (`hopper-ac-gae-sigmaFloor-entropy-weirdLR` — these back the report numbers)
 
-| Algorithm | Seed 1 | Seed 2 | Seed 3 |
+| Algorithm | Seed 42 | Seed 67 | Seed 128 |
 |---|---|---|---|
-| Actor-Critic | [y68n4nfo](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/y68n4nfo) | [kxbi33wh](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/kxbi33wh) | [hhh9fd4z](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/hhh9fd4z) |
-| REINFORCE (no baseline) | [sk8vp85i](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/sk8vp85i) | [v2muabmd](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/v2muabmd) | [6wyyjiqd](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/6wyyjiqd) |
-| REINFORCE (baseline b=20) | [i0tbi8jv](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/i0tbi8jv) | [oyqmwair](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/oyqmwair) | [sfhrnpul](https://wandb.ai/s355100-politecnico-di-torino/faiml-group64-part1/runs/sfhrnpul) |
+| Actor-Critic | [i545aipy](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/i545aipy) | [636v9kg2](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/636v9kg2) | [lomqneko](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/lomqneko) |
+| REINFORCE (no baseline) | [o13ot15g](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/o13ot15g) | [cyjiwtga](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/cyjiwtga) | [qglsc8ct](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/qglsc8ct) |
+| REINFORCE (baseline b=20) | [u0dpdlff](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/u0dpdlff) | [sz67y12d](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/sz67y12d) | [1wfqf7vy](https://wandb.ai/s355100-politecnico-di-torino/hopper-ac-gae-sigmaFloor-entropy-weirdLR/runs/1wfqf7vy) |
 
 **Part 2 — PandaPush SAC** (`faiml-group64-part2`)
 

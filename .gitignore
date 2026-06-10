@@ -50,6 +50,7 @@ secrets/
 *.fls
 *.blg
 *.bbl
+*.brf
 part1/hopper_videos/hopper_video_maker.py
 
 # Deliverable: keep final part 2 SAC models + eval results in repo

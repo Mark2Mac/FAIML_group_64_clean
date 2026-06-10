@@ -41,7 +41,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--eval-env-type", type=str, default="target", choices=["source", "target"])
     parser.add_argument("--eval-freq", type=int, default=10_000)
     parser.add_argument("--wandb", action="store_true", help="Log to Weights & Biases")
-    parser.add_argument("--wandb-project", type=str, default="faiml-group64-pandapush")
+    parser.add_argument("--wandb-project", type=str, default="faiml-group64-part2")
     # Optional hyperparameter overrides; left as None they keep the SB3 defaults (baseline runs unchanged)
     parser.add_argument("--lr", type=float, default=None)
     parser.add_argument("--batch-size", type=int, default=None)
